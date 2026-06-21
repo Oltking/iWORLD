@@ -290,8 +290,9 @@ export function CompanionCreator({
   return (
     <>
       <section className="intro">
-        <CompanionOrb size={108} state={orbState} />
-        <h2 className="intro-h">{editing ? `Shape ${companion!.name}` : 'Shape your companion'}</h2>
+        <CompanionOrb size={108} state={orbState} seed={editing ? companion!.version : undefined} />
+        <p className="world-kicker">Creation Studio</p>
+        <h2 className="intro-h">{editing ? `Shape ${companion!.name}` : 'Who will you create?'}</h2>
         <p className="intro-p">
           Who it is, how it talks, what it holds to — you decide, and it's yours. Nothing here can be
           changed behind your back: every detail is sealed under a version only you can move.
@@ -462,13 +463,14 @@ export function CompanionCreator({
       <section className={`card ${mintStatus}`}>
         <div className="card-h">
           <span className="step">5</span>
-          <h2>Mint agent token</h2>
+          <h2>Minting Hall</h2>
           {!agentNftConfigured() && <span className="badge">soon</span>}
         </div>
         <p className="muted small">
-          Mint an on-chain token (ERC-7857-shaped) committing to <span className="mono">{version.slice(0, 10)}…</span>{' '}
-          and your 0G brain rootHash — provable ownership + identity, transferable. Your personality is
-          already encrypted &amp; owned on 0G above; the token adds the chain layer.
+          Seal your agent into a real, ownable treasure — an <strong>iNFT (Agentic ID)</strong> committing
+          to <span className="mono">{version.slice(0, 10)}…</span> and its 0G brain. Provable ownership +
+          identity, transferable, yours. The personality is already encrypted on 0G above; the token adds
+          the chain layer.
         </p>
         {!agentNftConfigured() ? (
           <p className="muted small">Lights up once the AgentNFT contract is deployed (see packages/contracts).</p>

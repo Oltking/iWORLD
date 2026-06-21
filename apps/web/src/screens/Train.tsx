@@ -138,10 +138,11 @@ export function Train({
     <div className="train">
       <section className="intro">
         <CompanionOrb size={96} state={busy ? 'thinking' : 'idle'} seed={companion.version} />
+        <p className="world-kicker">Training Grounds</p>
         <h2 className="intro-h">Train {companion.name}</h2>
         <p className="intro-p">
           Teach it what matters — facts about you, how you want it to be. It’s encrypted, stored on 0G,
-          and yours. What you teach here, it remembers, and uses.
+          and yours. What you teach here, it remembers, and uses — and it grows smarter every round.
         </p>
       </section>
 

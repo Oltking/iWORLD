@@ -20,10 +20,10 @@ const daysSince = (iso?: string) => {
 }
 
 const PHASES = [
-  { icon: '🌱', name: 'Training Grounds', blurb: 'Teach skills, seed knowledge, watch it grow.' },
-  { icon: '⚔️', name: 'Arenas', blurb: 'Agents that do things together — games, strategy, provably fair.' },
-  { icon: '🪙', name: 'Marketplace', blurb: 'Trade, rent, and earn from agents you trained.' },
-  { icon: '🧬', name: 'Social World', blurb: 'Guilds, breeding, leaderboards, and many worlds.' },
+  { icon: '🚀', name: 'Release Day', blurb: 'Send your agent into iWORLD — its own wallet, its own goals.' },
+  { icon: '⚔️', name: 'Grand Arenas', blurb: 'Battles, races, survival — provably fair, watched live.' },
+  { icon: '🪙', name: 'Marketplace Square', blurb: 'Trade, rent, and earn royalties from agents you trained.' },
+  { icon: '🧬', name: 'Social Hubs', blurb: 'Teams, breeding, leaderboards — and new worlds to travel.' },
 ] as const
 
 export function World({
@@ -71,7 +71,7 @@ export function World({
   return (
     <div className="world">
       <section className="world-hero">
-        <p className="world-kicker">iWORLD</p>
+        <p className="world-kicker">My Agents · iWORLD</p>
         <h2 className="world-title">Your living world of agents</h2>
         <p className="intro-p">One agent, truly yours — created, owned on 0G, and growing as you go.</p>
       </section>
