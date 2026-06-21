@@ -378,6 +378,29 @@ code {
 .phase p { margin: 2px 0 0; }
 .phase-lock { margin-left: auto; font-size: 13px; opacity: 0.6; }
 
+/* ── Grand Arenas ───────────────────────────────────────────────────────── */
+.arena { display: flex; flex-direction: column; gap: 18px; }
+.lvl { display: flex; align-items: center; gap: 10px; justify-content: center; margin-top: 10px; }
+.lvl-badge { font-size: 13px; font-weight: 700; color: var(--amber); background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.4); border-radius: 999px; padding: 6px 13px; }
+.matchup { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.fighter { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; position: relative; }
+.fighter strong { font-size: 14px; text-align: center; }
+.score { position: absolute; top: -6px; right: 18%; font-size: 22px; font-weight: 800; background: var(--grad-cyan); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.vs { font-size: 14px; font-weight: 800; color: var(--faint); letter-spacing: 1px; flex: none; }
+.rounds-list { display: flex; flex-direction: column; gap: 8px; }
+.round { display: grid; grid-template-columns: 38px 1fr 28px 1fr; align-items: center; gap: 8px; padding: 9px 11px; border-radius: 12px; background: rgba(255,255,255,0.025); border: 1px solid var(--line); animation: rise 0.3s ease both; font-size: 13px; }
+.r-n { color: var(--faint); font-weight: 700; font-size: 11px; }
+.r-t { text-transform: capitalize; }
+.r-b { text-align: right; color: var(--muted); }
+.r-out { text-align: center; font-weight: 800; }
+.r-out.win { color: var(--emerald); }
+.r-out.lose { color: var(--coral); }
+.r-out.tie { color: var(--faint); }
+.result { margin-top: 14px; text-align: center; font-size: 16px; font-weight: 700; padding: 13px; border-radius: 14px; }
+.result.won { color: var(--emerald); background: linear-gradient(120deg, rgba(52,211,153,0.16), rgba(34,211,238,0.08)); border: 1px solid rgba(52,211,153,0.4); }
+.result.draw { color: var(--muted); background: var(--glass); border: 1px solid var(--line); }
+.result.lost { color: var(--amber); background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.3); }
+
 /* ── creation presets ───────────────────────────────────────────────────── */
 .presets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
 .preset {

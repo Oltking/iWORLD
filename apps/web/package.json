@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "selftest:crypto": "tsx src/lib/crypto.selftest.mts",
-    "selftest:export": "tsx src/lib/export.selftest.mts"
+    "selftest:export": "tsx src/lib/export.selftest.mts",
+    "selftest:arena": "tsx src/lib/arena.selftest.mts"
   },
   "dependencies": {
     "@0gfoundation/0g-compute-ts-sdk": "0.9.0-beta.0",

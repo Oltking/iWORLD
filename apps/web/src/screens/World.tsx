@@ -11,6 +11,7 @@ import { conversationHeadKey } from '../lib/session'
 import { loadPersonality } from '../lib/companion-store'
 import { loadKnowledge, knowledgeHeadKey } from '../lib/knowledge-store'
 import { getVersions } from '../lib/personality-history'
+import { getXP, levelFromXP } from '../lib/progress'
 import { CompanionOrb } from '../components/CompanionOrb'
 import type { PersonalityConfig } from '@kipr/core/personality'
 
@@ -31,6 +32,7 @@ export function World({
   companion,
   onTalk,
   onTrain,
+  onArena,
   onShape,
   onVault,
 }: {
@@ -38,9 +40,11 @@ export function World({
   companion: ActiveCompanion
   onTalk: () => void
   onTrain: () => void
+  onArena: () => void
   onShape: () => void
   onVault: () => void
 }) {
+  const level = levelFromXP(getXP(companion.ownerAddr))
   const [persona, setPersona] = useState<PersonalityConfig | null>(null)
   const [learned, setLearned] = useState<number | null>(null)
 
@@ -92,6 +96,7 @@ export function World({
         </div>
 
         <div className="agent-badges">
+          <span className="abadge">⭐ Level {level}</span>
           <span className="abadge">🔒 TEE-private</span>
           {companion.tokenId ? (
             <span className="abadge minted">🪙 Agent #{companion.tokenId} · owned on-chain</span>
@@ -112,6 +117,7 @@ export function World({
         <div className="agent-actions">
           <button onClick={onTalk}>Talk</button>
           <button className="ghost" onClick={onTrain}>Train</button>
+          <button className="ghost" onClick={onArena}>Arena</button>
           <button className="ghost" onClick={onShape}>Shape</button>
           <button className="ghost" onClick={onVault}>Yours</button>
         </div>
