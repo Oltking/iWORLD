@@ -105,7 +105,7 @@ export function Train({
   return (
     <div className="train">
       <section className="intro">
-        <CompanionOrb size={96} state={busy ? 'thinking' : 'idle'} />
+        <CompanionOrb size={96} state={busy ? 'thinking' : 'idle'} seed={companion.version} />
         <h2 className="intro-h">Train {companion.name}</h2>
         <p className="intro-p">
           Teach it what matters — facts about you, how you want it to be. It’s encrypted, stored on 0G,
@@ -147,7 +147,7 @@ export function Train({
             </button>
             {ack && (
               <div className="ack">
-                <CompanionOrb size={28} state="idle" />
+                <CompanionOrb size={28} state="idle" seed={companion.version} />
                 <span>{ack}</span>
               </div>
             )}

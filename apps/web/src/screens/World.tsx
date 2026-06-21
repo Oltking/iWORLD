@@ -79,7 +79,7 @@ export function World({
       {/* The agent */}
       <section className="agent-card">
         <div className="agent-aura">
-          <CompanionOrb size={128} state="idle" />
+          <CompanionOrb size={128} state="idle" seed={companion.version} />
         </div>
         <h3 className="agent-name">{companion.name}</h3>
         <p className="agent-vibe">{persona?.vibe ?? 'a companion that’s truly yours'}</p>

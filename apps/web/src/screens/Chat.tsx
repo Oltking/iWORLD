@@ -84,6 +84,7 @@ export function Chat({
   const [activateStatus, setActivateStatus] = useState<Status>('idle')
   const [activateErr, setActivateErr] = useState('')
   const [thinking, setThinking] = useState(false)
+  const [knownCount, setKnownCount] = useState(0)
 
   const brokerRef = useRef<Broker | null>(null)
   const providerRef = useRef<InferenceService | null>(null)
@@ -156,6 +157,21 @@ export function Chat({
         /* keep the greeting if reload fails */
       })
   }, [ownerKey, head, initial])
+
+  // Always know how much we've been taught (for the "remembers you" signal), even in
+  // preview mode where the compute setup doesn't run.
+  useEffect(() => {
+    if (!ownerKey) return
+    const knowHead = localStorage.getItem(knowledgeHeadKey(companion.ownerAddr))
+    if (!knowHead) return
+    let cancelled = false
+    loadKnowledge(ownerKey, knowHead)
+      .then((items) => !cancelled && setKnownCount(items.length))
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [ownerKey, companion.ownerAddr])
 
   const unsaved = messages.length - savedCount
 
@@ -281,10 +297,12 @@ export function Chat({
   return (
     <div className="chat">
       <div className="chat-head">
-        <CompanionOrb size={40} state={thinking || saveStatus === 'busy' ? 'thinking' : 'idle'} />
+        <CompanionOrb size={40} state={thinking || saveStatus === 'busy' ? 'thinking' : 'idle'} seed={companion.version} />
         <div className="chat-id">
           <strong>{companion.name}</strong>
-          <span className="muted small">🔒 private · owned on 0G</span>
+          <span className="muted small">
+            🔒 private{knownCount > 0 ? ` · 🧠 remembers ${knownCount}` : ' · owned on 0G'}
+          </span>
         </div>
         <ComputeBadge state={compute} />
       </div>
