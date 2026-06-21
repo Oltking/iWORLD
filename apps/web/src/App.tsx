@@ -160,12 +160,12 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
         {!conn && !showDev ? (
           <section className="hero">
             <CompanionOrb size={150} state="idle" />
-            <h1 className="brand">KIPR</h1>
-            <p className="tagline">A companion that's truly yours.</p>
+            <h1 className="brand">iWORLD</h1>
+            <p className="tagline">Agents you create, own, and grow.</p>
             <p className="lede">
-              Private by design — your conversations run in a sealed enclave, and your companion's
-              memory &amp; personality live in storage <em>you</em> own. No company can read it, change
-              it, or take it away.
+              A living world of AI agents that are truly yours. Private by design — your agent thinks
+              in a sealed enclave, and its memory &amp; personality live in storage <em>you</em> own.
+              No company can read it, change it, or take it away.
             </p>
             <div className="cta-group">
               {privyEnabled && (
@@ -180,7 +180,7 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                   {walletStatus === 'busy' ? 'Connecting…' : privyEnabled ? 'or connect a wallet' : 'Begin'}
                 </button>
               ) : (
-                !privyEnabled && <p className="muted small">KIPR needs an EVM wallet like MetaMask.</p>
+                !privyEnabled && <p className="muted small">iWORLD needs an EVM wallet like MetaMask.</p>
               )}
             </div>
             {walletErr && <p className="err">{walletErr}</p>}
@@ -198,7 +198,7 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                 <div className="hd-brand">
                   <CompanionOrb size={42} state={unlockStatus === 'busy' ? 'thinking' : 'idle'} />
                   <div>
-                    <h1 className="brand sm">KIPR</h1>
+                    <h1 className="brand sm">iWORLD</h1>
                     <p className="sub">private · yours</p>
                   </div>
                 </div>
@@ -294,7 +294,7 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
         <footer className="ft">
           <span className="ftdot" /> 0G Galileo testnet · chainId {OG_TESTNET.chainId}
           <button className="devlink" onClick={() => setShowDev((v) => !v)}>
-            {showDev ? '← back to KIPR' : 'developer tools'}
+            {showDev ? '← back to iWORLD' : 'developer tools'}
           </button>
         </footer>
       </main>

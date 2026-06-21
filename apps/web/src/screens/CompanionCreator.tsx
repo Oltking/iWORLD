@@ -80,7 +80,7 @@ export function CompanionCreator({
     personalityRootHash: string
   }) => void
 }) {
-  const [name, setName] = useState('KIPR')
+  const [name, setName] = useState('')
   const [pronouns, setPronouns] = useState('')
   const [vibe, setVibe] = useState('warm, grounded, and honest; concise; a dry sense of humor')
   const [values, setValues] = useState(
@@ -143,7 +143,7 @@ export function CompanionCreator({
   const config = useMemo<PersonalityConfig>(
     () =>
       makePersonality({
-        name: name.trim() || 'KIPR',
+        name: name.trim() || 'Nova',
         ...(pronouns.trim() ? { pronouns: pronouns.trim() } : {}),
         vibe: vibe.trim(),
         values: linesToList(values),
@@ -233,7 +233,7 @@ export function CompanionCreator({
         </div>
 
         <label className="lbl">Name</label>
-        <input className="inp" value={name} onChange={(e) => setName(e.target.value)} />
+        <input className="inp" value={name} onChange={(e) => setName(e.target.value)} placeholder="Name your agent…" />
 
         <label className="lbl">Pronouns (optional)</label>
         <input className="inp" value={pronouns} onChange={(e) => setPronouns(e.target.value)} placeholder="e.g. they/them" />
