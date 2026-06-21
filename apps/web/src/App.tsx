@@ -285,6 +285,7 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                       setView('world')
                     }
                   }}
+                  onMinted={(tokenId) => setCompanion((c) => (c ? { ...c, tokenId } : c))}
                 />
               )}
             </Suspense>

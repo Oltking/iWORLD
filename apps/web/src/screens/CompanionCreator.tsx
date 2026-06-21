@@ -103,6 +103,7 @@ export function CompanionCreator({
   unlockStatus,
   companion,
   onCompanionReady,
+  onMinted,
 }: {
   conn: Connection | null
   ownerKey: CryptoKey | null
@@ -116,6 +117,7 @@ export function CompanionCreator({
     version: string
     personalityRootHash: string
   }) => void
+  onMinted: (tokenId: string) => void
 }) {
   const [name, setName] = useState('')
   const [pronouns, setPronouns] = useState('')
@@ -260,6 +262,7 @@ export function CompanionCreator({
       })
       setMinted(res)
       setMintStatus('ok')
+      if (res.tokenId) onMinted(res.tokenId)
     } catch (e) {
       setMintErr((e as Error).message)
       setMintStatus('error')

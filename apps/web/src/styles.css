@@ -361,6 +361,7 @@ code {
 
 .agent-badges { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; margin-top: 8px; }
 .abadge { font-size: 12px; font-weight: 600; color: var(--muted); background: var(--glass); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; }
+.abadge.minted { color: var(--amber); border-color: rgba(251, 191, 36, 0.4); background: rgba(251, 191, 36, 0.1); }
 
 .agent-values { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .agent-values li { color: var(--muted); font-size: 13.5px; }

@@ -93,7 +93,11 @@ export function World({
 
         <div className="agent-badges">
           <span className="abadge">🔒 TEE-private</span>
-          <span className="abadge">🔑 Yours on 0G</span>
+          {companion.tokenId ? (
+            <span className="abadge minted">🪙 Agent #{companion.tokenId} · owned on-chain</span>
+          ) : (
+            <span className="abadge">🔑 Yours on 0G</span>
+          )}
           <span className="abadge mono">{companion.version.slice(0, 10)}…</span>
         </div>
 

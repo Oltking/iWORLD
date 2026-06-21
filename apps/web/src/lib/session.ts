@@ -14,6 +14,8 @@ export interface ActiveCompanion {
   modelId: string
   version: string
   personalityRootHash: string
+  /** ERC-7857 token id once the agent is minted on-chain (Phase 2). */
+  tokenId?: string
 }
 
 export const conversationHeadKey = (ownerAddr: string) => `kipr.conv.head.${ownerAddr}`
