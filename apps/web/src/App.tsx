@@ -28,10 +28,11 @@ const World = lazy(() => import('./screens/World').then((m) => ({ default: m.Wor
 const Chat = lazy(() => import('./screens/Chat').then((m) => ({ default: m.Chat })))
 const Train = lazy(() => import('./screens/Train').then((m) => ({ default: m.Train })))
 const Arena = lazy(() => import('./screens/Arena').then((m) => ({ default: m.Arena })))
+const Market = lazy(() => import('./screens/Market').then((m) => ({ default: m.Market })))
 const Vault = lazy(() => import('./screens/Vault').then((m) => ({ default: m.Vault })))
 const Harness = lazy(() => import('./screens/Harness').then((m) => ({ default: m.Harness })))
 
-type View = 'world' | 'create' | 'chat' | 'train' | 'arena' | 'vault'
+type View = 'world' | 'create' | 'chat' | 'train' | 'arena' | 'market' | 'vault'
 
 // Sponsored funding is optional — only offered when a funder service is configured.
 const funderConfigured = !!(import.meta.env.VITE_FUNDER_URL as string | undefined)
@@ -236,6 +237,7 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                       <button className={view === 'chat' ? 'tab on' : 'tab'} onClick={() => setView('chat')}>Chat</button>
                       <button className={view === 'train' ? 'tab on' : 'tab'} onClick={() => setView('train')}>Train</button>
                       <button className={view === 'arena' ? 'tab on' : 'tab'} onClick={() => setView('arena')}>Arena</button>
+                      <button className={view === 'market' ? 'tab on' : 'tab'} onClick={() => setView('market')}>Market</button>
                       <button className={view === 'vault' ? 'tab on' : 'tab'} onClick={() => setView('vault')}>Yours</button>
                     </>
                   ) : (
@@ -258,6 +260,7 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                   onTalk={() => setView('chat')}
                   onTrain={() => setView('train')}
                   onArena={() => setView('arena')}
+                  onMarket={() => setView('market')}
                   onShape={() => setView('create')}
                   onVault={() => setView('vault')}
                 />
@@ -265,6 +268,8 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                 <Train conn={conn} ownerKey={ownerKey} companion={companion} />
               ) : companion && view === 'arena' && conn ? (
                 <Arena conn={conn} ownerKey={ownerKey} companion={companion} />
+              ) : view === 'market' && conn ? (
+                <Market conn={conn} companion={companion} />
               ) : view === 'vault' && conn ? (
                 <Vault conn={conn} ownerKey={ownerKey} companion={companion} onRestore={onRestore} onDelete={onDelete} />
               ) : companion && view === 'chat' && conn ? (

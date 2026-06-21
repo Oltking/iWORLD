@@ -34,6 +34,7 @@ export function World({
   onTalk,
   onTrain,
   onArena,
+  onMarket,
   onShape,
   onVault,
 }: {
@@ -42,6 +43,7 @@ export function World({
   onTalk: () => void
   onTrain: () => void
   onArena: () => void
+  onMarket: () => void
   onShape: () => void
   onVault: () => void
 }) {
@@ -120,6 +122,7 @@ export function World({
           <button onClick={onTalk}>Talk</button>
           <button className="ghost" onClick={onTrain}>Train</button>
           <button className="ghost" onClick={onArena}>Arena</button>
+          <button className="ghost" onClick={onMarket}>Market</button>
           <button className="ghost" onClick={onShape}>Shape</button>
           <button className="ghost" onClick={onVault}>Yours</button>
         </div>

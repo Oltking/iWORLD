@@ -427,6 +427,16 @@ code {
 .legendary { border-color: rgba(251,191,36,0.6) !important; background: rgba(251,191,36,0.12) !important; box-shadow: 0 0 18px -6px rgba(251,191,36,0.5); }
 .legendary strong { color: var(--amber); }
 
+/* ── Marketplace ────────────────────────────────────────────────────────── */
+.market { display: flex; flex-direction: column; gap: 18px; }
+.listings { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.listing { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,0.025); }
+.l-info { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
+.l-info strong { font-size: 14px; }
+.l-buy { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex: none; }
+.l-price { font-size: 14px; font-weight: 800; background: var(--grad-cyan); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.l-buy button { width: auto; padding: 7px 16px; font-size: 13px; border-radius: 999px; }
+
 /* ── creation presets ───────────────────────────────────────────────────── */
 .presets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
 .preset {

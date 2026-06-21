@@ -11,9 +11,27 @@ transferable.
 > the brain to a buyer via a TEE oracle) reuses the canonical `0g-agent-nft` verifier
 > stack and is the next step.
 
-## ✅ Status — verified
-Compiles (Solc 0.8.24) and **4/4 Foundry tests pass** (mint commits dataHash+rootHash+
-owner · owner-only update · transfer · fee/refund). Deploy is gated on a funded wallet.
+## ✅ Status — verified + DEPLOYED on 0G Galileo testnet
+Compiles (Solc 0.8.24), **10/10 Foundry tests pass**, and both contracts are live:
+
+| Contract | Address (chain 16602) |
+|---|---|
+| **AgentNFT** | `0xade8466d4c89940a7a653e15927407d5922433c0` |
+| **AgentMarket** (escrow, 2.5% fee) | `0x86e7746cBa2C71C832B9904935E56B7aA6b39975` |
+
+`AgentMarket.sol` = list / buy / cancel an agent on-chain (ownership transfers, seller
+paid minus fee). **TESTNET DEMO** of the economy — no real value, so the regulated
+real-money concerns don't apply here; mainnet would need legal review. v1 moves the
+ownership token; the ERC-7857 re-keyed brain transfer is the deeper step.
+
+### Deploy gotcha (0G testnet)
+0G rejects EIP-1559 txs with a low tip — use **`--legacy --with-gas-price 5000000000`**:
+```bash
+export ZG_PRIVATE_KEY=0x...      ZG_EVM_RPC=https://evmrpc-testnet.0g.ai
+forge script script/Deploy.s.sol:Deploy --rpc-url $ZG_EVM_RPC --broadcast --legacy --with-gas-price 5000000000
+AGENT_NFT_ADDRESS=0x... forge script script/DeployMarket.s.sol:DeployMarket --rpc-url $ZG_EVM_RPC --broadcast --legacy --with-gas-price 5000000000
+```
+Cost: AgentNFT ~0.0093 0G, AgentMarket ~0.0054 0G. Tiny.
 
 ## Verify (no gas)
 ```bash
