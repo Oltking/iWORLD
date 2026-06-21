@@ -411,6 +411,22 @@ code {
 .lduel { width: auto; padding: 6px 14px; font-size: 12.5px; border-radius: 999px; }
 .lduel-spacer { width: 1px; }
 
+/* loot + gear (rarity colours) */
+.loot-drop { display: flex; align-items: center; gap: 12px; margin-top: 12px; padding: 12px 14px; border-radius: 14px; animation: rise 0.4s ease both; }
+.loot-ic { font-size: 28px; flex: none; }
+.gear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.gear { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,0.025); }
+.gear-ic { font-size: 22px; flex: none; }
+.gear strong, .loot-drop strong { font-size: 13.5px; }
+.gear p, .loot-drop p { margin: 1px 0 0; text-transform: capitalize; }
+.common { border-color: rgba(167,169,190,0.4) !important; }
+.rare { border-color: rgba(34,211,238,0.5) !important; background: rgba(34,211,238,0.07) !important; }
+.rare strong { color: var(--cyan); }
+.epic { border-color: rgba(139,92,246,0.55) !important; background: rgba(139,92,246,0.1) !important; }
+.epic strong { color: var(--violet); }
+.legendary { border-color: rgba(251,191,36,0.6) !important; background: rgba(251,191,36,0.12) !important; box-shadow: 0 0 18px -6px rgba(251,191,36,0.5); }
+.legendary strong { color: var(--amber); }
+
 /* ── creation presets ───────────────────────────────────────────────────── */
 .presets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
 .preset {

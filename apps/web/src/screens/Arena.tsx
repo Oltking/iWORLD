@@ -11,6 +11,7 @@ import { runDuel, styleFromText, TACTIC_ICON, type Fighter, type MatchResult } f
 import { champions, type Champion } from '../lib/champions'
 import { loadPersonality } from '../lib/companion-store'
 import { addXP, getXP, levelFromXP } from '../lib/progress'
+import { ownedStyleBoost, ownedXpBonus, rollDrop, addItem, type Item } from '../lib/items'
 import { encryptOwned } from '../lib/crypto'
 import { uploadBytes } from '../lib/storage'
 import { CompanionOrb } from '../components/CompanionOrb'
@@ -35,6 +36,7 @@ export function Arena({
   const [fighting, setFighting] = useState(false)
   const [xp, setXp] = useState(() => getXP(companion.ownerAddr))
   const [matchXp, setMatchXp] = useState(0)
+  const [drop, setDrop] = useState<Item | null>(null)
   const [saveStatus, setSaveStatus] = useState<Status>('idle')
   const [savedRoot, setSavedRoot] = useState<string | null>(null)
   const [saveErr, setSaveErr] = useState('')
@@ -53,12 +55,17 @@ export function Arena({
 
   function fight(champ: Champion) {
     timers.current.forEach(clearTimeout)
+    const owner = companion.ownerAddr
     const seed = `${companion.version}:${champ.id}:${Date.now()}:${Math.floor(Math.random() * 1e9)}`
-    const me: Fighter = { name: companion.name, style: styleFromText(styleText || companion.name) }
+
+    // The agent's character + its owned gear shape its fighting style.
+    const style = { ...styleFromText(styleText || companion.name) }
+    const boost = ownedStyleBoost(owner)
+    for (const k of Object.keys(boost) as (keyof typeof style)[]) style[k] += boost[k] ?? 0
+    const me: Fighter = { name: companion.name, style }
     const res = runDuel(me, champ, seed)
 
-    // XP scales with the champion's level — climbing rewards beating the strong.
-    const earned = res.winner === 'a' ? 14 + champ.level * 3 : res.winner === 'draw' ? 8 + champ.level : 4
+    const baseXp = res.winner === 'a' ? 14 + champ.level * 3 : res.winner === 'draw' ? 8 + champ.level : 4
 
     setOpponent(champ)
     setResult(res)
@@ -66,7 +73,7 @@ export function Arena({
     setFighting(true)
     setSavedRoot(null)
     setSaveErr('')
-    setMatchXp(earned)
+    setDrop(null)
 
     res.rounds.forEach((_, i) => {
       timers.current.push(window.setTimeout(() => setShown(i + 1), (i + 1) * 800))
@@ -74,7 +81,16 @@ export function Arena({
     timers.current.push(
       window.setTimeout(() => {
         setFighting(false)
-        setXp(addXP(companion.ownerAddr, earned))
+        let earned = Math.round(baseXp * (1 + ownedXpBonus(owner)))
+        if (res.winner === 'a') {
+          const loot = rollDrop(champ.level)
+          if (loot) {
+            if (addItem(owner, loot.id) === 'new') setDrop(loot)
+            else earned += 8 // duplicate → bonus XP
+          }
+        }
+        setMatchXp(earned)
+        setXp(addXP(owner, earned))
       }, res.rounds.length * 800 + 300),
     )
   }
@@ -163,6 +179,15 @@ export function Arena({
                 <div className={`result ${won ? 'won' : draw ? 'draw' : 'lost'}`}>
                   {won ? `🏆 ${companion.name} beats ${opponent.name}! +${matchXp} XP` : draw ? `⚖️ A draw with ${opponent.name}. +${matchXp} XP` : `💪 ${opponent.name} held. +${matchXp} XP`}
                 </div>
+                {drop && (
+                  <div className={`loot-drop ${drop.rarity}`}>
+                    <span className="loot-ic">{drop.icon}</span>
+                    <div>
+                      <strong>Loot! {drop.name}</strong>
+                      <p className="muted small">{drop.rarity} · {drop.flavor}</p>
+                    </div>
+                  </div>
+                )}
                 {ownerKey && (
                   <div className="memrow">
                     <button className="ghost" onClick={saveMatch} disabled={saveStatus === 'busy' || !!savedRoot}>

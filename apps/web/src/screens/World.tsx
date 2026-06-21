@@ -12,6 +12,7 @@ import { loadPersonality } from '../lib/companion-store'
 import { loadKnowledge, knowledgeHeadKey } from '../lib/knowledge-store'
 import { getVersions } from '../lib/personality-history'
 import { getXP, levelFromXP } from '../lib/progress'
+import { ownedItems } from '../lib/items'
 import { CompanionOrb } from '../components/CompanionOrb'
 import type { PersonalityConfig } from '@kipr/core/personality'
 
@@ -45,6 +46,7 @@ export function World({
   onVault: () => void
 }) {
   const level = levelFromXP(getXP(companion.ownerAddr))
+  const gear = ownedItems(companion.ownerAddr)
   const [persona, setPersona] = useState<PersonalityConfig | null>(null)
   const [learned, setLearned] = useState<number | null>(null)
 
@@ -122,6 +124,29 @@ export function World({
           <button className="ghost" onClick={onVault}>Yours</button>
         </div>
       </section>
+
+      {/* Gear — loot earned in the Arena */}
+      {gear.length > 0 && (
+        <section className="card">
+          <div className="card-h">
+            <span className="step">🎒</span>
+            <h2>Gear</h2>
+            <span className="badge">{gear.length}</span>
+          </div>
+          <p className="muted small">Loot won in the Arena — it tunes how {companion.name} fights.</p>
+          <div className="gear-grid">
+            {gear.map((it) => (
+              <div key={it.id} className={`gear ${it.rarity}`} title={it.flavor}>
+                <span className="gear-ic">{it.icon}</span>
+                <div>
+                  <strong>{it.name}</strong>
+                  <p className="muted small">{it.rarity}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* How it grows — on-thesis, honest */}
       <section className="card">
