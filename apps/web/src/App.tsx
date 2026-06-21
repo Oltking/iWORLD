@@ -32,6 +32,9 @@ const Harness = lazy(() => import('./screens/Harness').then((m) => ({ default: m
 
 type View = 'world' | 'create' | 'chat' | 'train' | 'vault'
 
+// Sponsored funding is optional — only offered when a funder service is configured.
+const funderConfigured = !!(import.meta.env.VITE_FUNDER_URL as string | undefined)
+
 export function App({ privyEnabled }: { privyEnabled: boolean }) {
   const [conn, setConn] = useState<Connection | null>(null)
   const [walletStatus, setWalletStatus] = useState<Status>('idle')
@@ -217,7 +220,7 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
               {conn && balance !== null && Number(balance) < 0.05 && (
                 <div className="lowfunds">
                   <span>⚠ Low on 0G ({balance}). Saving to 0G needs a little gas.</span>
-                  {walletKind === 'embedded' && privyEnabled ? (
+                  {walletKind === 'embedded' && privyEnabled && funderConfigured ? (
                     <FundingButton address={conn.address} onFunded={() => void refreshBalance(conn)} />
                   ) : (
                     <a href="https://faucet.0g.ai" target="_blank" rel="noreferrer">get some free →</a>
