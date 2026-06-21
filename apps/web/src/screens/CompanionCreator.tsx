@@ -24,6 +24,7 @@ import { personalityIntelligentData } from '@kipr/core/companion'
 import type { Connection } from '../lib/wallet'
 import type { ActiveCompanion } from '../lib/session'
 import { persistPersonality, loadPersonality } from '../lib/companion-store'
+import { mintAgent, agentNftConfigured, type MintResult } from '../lib/mint'
 import { addVersion, getVersions } from '../lib/personality-history'
 import { OG_TESTNET } from '../lib/og'
 import { Dot, type Status } from '../components/Dot'
@@ -143,6 +144,10 @@ export function CompanionCreator({
   const [recoverErr, setRecoverErr] = useState('')
   const [recovered, setRecovered] = useState<{ name: string; version: string } | null>(null)
 
+  const [mintStatus, setMintStatus] = useState<Status>('idle')
+  const [mintErr, setMintErr] = useState('')
+  const [minted, setMinted] = useState<MintResult | null>(null)
+
   // Editing an existing companion: load its current personality from 0G into the form
   // so edits diff against the real, in-force version (P3). `baseline` is that version.
   const editing = !!companion
@@ -238,6 +243,26 @@ export function CompanionCreator({
     } catch (e) {
       setSaveErr((e as Error).message)
       setSaveStatus('error')
+    }
+  }
+
+  // Phase 2: mint the agent as an on-chain token committing to its version + brain rootHash.
+  async function onMint() {
+    if (!conn || !saved) return
+    setMintStatus('busy')
+    setMintErr('')
+    try {
+      const res = await mintAgent(conn.signer, {
+        dataDescription: dataHash.dataDescription,
+        dataHash: saved.version,
+        rootHash: saved.rootHash,
+        to: conn.address,
+      })
+      setMinted(res)
+      setMintStatus('ok')
+    } catch (e) {
+      setMintErr((e as Error).message)
+      setMintStatus('error')
     }
   }
 
@@ -430,18 +455,32 @@ export function CompanionCreator({
       {/* P3 — the version timeline */}
       {editing && <VersionHistory versions={getVersions(owner)} current={companion!.version} />}
 
-      {/* The one remaining gated step */}
-      <section className="card gated">
+      {/* Phase 2 — mint the agent token (real when the contract is deployed) */}
+      <section className={`card ${mintStatus}`}>
         <div className="card-h">
           <span className="step">5</span>
-          <h2>Mint companion token</h2>
-          <span className="badge">gated</span>
+          <h2>Mint agent token</h2>
+          {!agentNftConfigured() && <span className="badge">soon</span>}
         </div>
         <p className="muted small">
-          Mint the ERC-7857 token committing to <span className="mono">{version.slice(0, 10)}…</span> — pending
-          the contract-deploy decision. Your personality is already encrypted &amp; owned on 0G above; the
-          token adds on-chain identity + transfer.
+          Mint an on-chain token (ERC-7857-shaped) committing to <span className="mono">{version.slice(0, 10)}…</span>{' '}
+          and your 0G brain rootHash — provable ownership + identity, transferable. Your personality is
+          already encrypted &amp; owned on 0G above; the token adds the chain layer.
         </p>
+        {!agentNftConfigured() ? (
+          <p className="muted small">Lights up once the AgentNFT contract is deployed (see packages/contracts).</p>
+        ) : !saved ? (
+          <p className="muted small">Save your agent to 0G first.</p>
+        ) : minted ? (
+          <div className="okbox">
+            <p>✓ Minted agent <strong>#{minted.tokenId}</strong> — it’s yours on-chain. <span className="mono">{minted.txHash.slice(0, 14)}…</span></p>
+          </div>
+        ) : (
+          <button onClick={onMint} disabled={mintStatus === 'busy'}>
+            {mintStatus === 'busy' ? 'Minting…' : 'Mint agent token'}
+          </button>
+        )}
+        {mintErr && <p className="err">{mintErr}</p>}
       </section>
     </>
   )
