@@ -26,10 +26,11 @@ import type { Status } from './components/Dot'
 // Lazy so the heavy compute SDK (chat) and storage SDK aren't in the first paint.
 const World = lazy(() => import('./screens/World').then((m) => ({ default: m.World })))
 const Chat = lazy(() => import('./screens/Chat').then((m) => ({ default: m.Chat })))
+const Train = lazy(() => import('./screens/Train').then((m) => ({ default: m.Train })))
 const Vault = lazy(() => import('./screens/Vault').then((m) => ({ default: m.Vault })))
 const Harness = lazy(() => import('./screens/Harness').then((m) => ({ default: m.Harness })))
 
-type View = 'world' | 'create' | 'chat' | 'vault'
+type View = 'world' | 'create' | 'chat' | 'train' | 'vault'
 
 export function App({ privyEnabled }: { privyEnabled: boolean }) {
   const [conn, setConn] = useState<Connection | null>(null)
@@ -225,16 +226,19 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
               )}
               {!showDev && (
                 <nav className="tabs">
-                  {companion && (
+                  {companion ? (
                     <>
                       <button className={view === 'world' ? 'tab on' : 'tab'} onClick={() => setView('world')}>World</button>
                       <button className={view === 'chat' ? 'tab on' : 'tab'} onClick={() => setView('chat')}>Chat</button>
+                      <button className={view === 'train' ? 'tab on' : 'tab'} onClick={() => setView('train')}>Train</button>
+                      <button className={view === 'vault' ? 'tab on' : 'tab'} onClick={() => setView('vault')}>Yours</button>
+                    </>
+                  ) : (
+                    <>
+                      <button className={view === 'create' ? 'tab on' : 'tab'} onClick={() => setView('create')}>Create</button>
+                      <button className={view === 'vault' ? 'tab on' : 'tab'} onClick={() => setView('vault')}>Yours</button>
                     </>
                   )}
-                  <button className={view === 'create' ? 'tab on' : 'tab'} onClick={() => setView('create')}>
-                    {companion ? 'Shape' : 'Create'}
-                  </button>
-                  <button className={view === 'vault' ? 'tab on' : 'tab'} onClick={() => setView('vault')}>Yours</button>
                 </nav>
               )}
             </header>
@@ -247,9 +251,12 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                   ownerKey={ownerKey}
                   companion={companion}
                   onTalk={() => setView('chat')}
+                  onTrain={() => setView('train')}
                   onShape={() => setView('create')}
                   onVault={() => setView('vault')}
                 />
+              ) : companion && view === 'train' && conn ? (
+                <Train conn={conn} ownerKey={ownerKey} companion={companion} />
               ) : view === 'vault' && conn ? (
                 <Vault conn={conn} ownerKey={ownerKey} companion={companion} onRestore={onRestore} onDelete={onDelete} />
               ) : companion && view === 'chat' && conn ? (

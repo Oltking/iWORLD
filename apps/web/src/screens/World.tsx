@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { ActiveCompanion } from '../lib/session'
 import { conversationHeadKey } from '../lib/session'
 import { loadPersonality } from '../lib/companion-store'
+import { loadKnowledge, knowledgeHeadKey } from '../lib/knowledge-store'
 import { getVersions } from '../lib/personality-history'
 import { CompanionOrb } from '../components/CompanionOrb'
 import type { PersonalityConfig } from '@kipr/core/personality'
@@ -29,16 +30,19 @@ export function World({
   ownerKey,
   companion,
   onTalk,
+  onTrain,
   onShape,
   onVault,
 }: {
   ownerKey: CryptoKey | null
   companion: ActiveCompanion
   onTalk: () => void
+  onTrain: () => void
   onShape: () => void
   onVault: () => void
 }) {
   const [persona, setPersona] = useState<PersonalityConfig | null>(null)
+  const [learned, setLearned] = useState<number | null>(null)
 
   useEffect(() => {
     if (!ownerKey) return
@@ -46,10 +50,18 @@ export function World({
     loadPersonality(ownerKey, companion.personalityRootHash)
       .then(({ config }) => !cancelled && setPersona(config))
       .catch(() => {})
+    const knowHead = localStorage.getItem(knowledgeHeadKey(companion.ownerAddr))
+    if (knowHead) {
+      loadKnowledge(ownerKey, knowHead)
+        .then((items) => !cancelled && setLearned(items.length))
+        .catch(() => {})
+    } else {
+      setLearned(0)
+    }
     return () => {
       cancelled = true
     }
-  }, [ownerKey, companion.personalityRootHash])
+  }, [ownerKey, companion.personalityRootHash, companion.ownerAddr])
 
   const versions = useMemo(() => getVersions(companion.ownerAddr), [companion.ownerAddr])
   const born = versions[0]?.createdAt
@@ -74,8 +86,9 @@ export function World({
 
         <div className="agent-stats">
           <div className="stat"><span className="stat-n">{age}</span><span className="stat-l">day{age === 1 ? '' : 's'} alive</span></div>
+          <div className="stat"><span className="stat-n">{learned ?? '·'}</span><span className="stat-l">learned</span></div>
           <div className="stat"><span className="stat-n">{versions.length || 1}</span><span className="stat-l">version{versions.length === 1 ? '' : 's'}</span></div>
-          <div className="stat"><span className="stat-n">{hasMemory ? '✓' : '—'}</span><span className="stat-l">owned memory</span></div>
+          <div className="stat"><span className="stat-n">{hasMemory ? '✓' : '—'}</span><span className="stat-l">memory</span></div>
         </div>
 
         <div className="agent-badges">
@@ -93,7 +106,8 @@ export function World({
         ) : null}
 
         <div className="agent-actions">
-          <button onClick={onTalk}>Talk to {companion.name}</button>
+          <button onClick={onTalk}>Talk</button>
+          <button className="ghost" onClick={onTrain}>Train</button>
           <button className="ghost" onClick={onShape}>Shape</button>
           <button className="ghost" onClick={onVault}>Yours</button>
         </div>

@@ -29,6 +29,7 @@ import {
   type InferenceService,
 } from '../lib/compute'
 import { loadPersonality } from '../lib/companion-store'
+import { loadKnowledge, knowledgeHeadKey, knowledgePromptBlock } from '../lib/knowledge-store'
 import { conversationHeadKey, type ActiveCompanion } from '../lib/session'
 import { ProvenanceBadge } from '../components/ProvenanceBadge'
 import { CompanionOrb } from '../components/CompanionOrb'
@@ -109,7 +110,17 @@ export function Chat({
         providerRef.current = provider
         try {
           const { config } = await loadPersonality(ownerKey, companion.personalityRootHash)
-          systemPromptRef.current = config.systemPrompt
+          let prompt = config.systemPrompt
+          // Inject what the agent has been taught (Training Grounds) so it actually uses it.
+          const knowHead = localStorage.getItem(knowledgeHeadKey(companion.ownerAddr))
+          if (knowHead) {
+            try {
+              prompt += knowledgePromptBlock(await loadKnowledge(ownerKey, knowHead))
+            } catch {
+              /* knowledge load failed — proceed with base persona */
+            }
+          }
+          systemPromptRef.current = prompt
         } catch {
           /* fall back to no system prompt */
         }
