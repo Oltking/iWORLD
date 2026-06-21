@@ -11,18 +11,25 @@ transferable.
 > the brain to a buyer via a TEE oracle) reuses the canonical `0g-agent-nft` verifier
 > stack and is the next step.
 
-## ⚠️ Status
-The contract + tests + deploy script are written and reviewed, but were **not compiled
-here** — the Foundry toolchain couldn't be installed in the build sandbox (blocked
-binary download). Run `forge test` on any machine with Foundry to verify (one command),
-then deploy when a wallet is funded.
+## ✅ Status — verified
+Compiles (Solc 0.8.24) and **4/4 Foundry tests pass** (mint commits dataHash+rootHash+
+owner · owner-only update · transfer · fee/refund). Deploy is gated on a funded wallet.
 
 ## Verify (no gas)
 ```bash
-# install Foundry once: https://getfoundry.sh   (curl -L https://foundry.paradigm.xyz | bash && foundryup)
 cd packages/contracts
-forge install foundry-rs/forge-std OpenZeppelin/openzeppelin-contracts --no-commit
-forge test -vvv          # runs the unit tests in test/AgentNFT.t.sol
+forge install foundry-rs/forge-std OpenZeppelin/openzeppelin-contracts   # forge 1.7+: no --no-commit
+forge test -vv
+```
+
+### Installing Foundry on this machine
+`forge` is already installed at `~/.foundry/bin/forge`. If you need to reinstall and
+`foundryup`/`brew install foundry` fail with network errors (ghcr.io PROTOCOL_ERROR),
+the direct download with HTTP/1.1 works:
+```bash
+curl --http1.1 -fsSL https://github.com/foundry-rs/foundry/releases/download/stable/foundry_stable_darwin_arm64.tar.gz -o /tmp/foundry.tar.gz
+mkdir -p ~/.foundry/bin && tar -xzf /tmp/foundry.tar.gz -C ~/.foundry/bin forge cast anvil
+export PATH="$HOME/.foundry/bin:$PATH"   # add to ~/.zshrc to persist
 ```
 
 ## Deploy to 0G Galileo (needs a funded deployer)
