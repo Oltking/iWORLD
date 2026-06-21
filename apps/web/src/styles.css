@@ -377,6 +377,18 @@ code {
 .phase p { margin: 2px 0 0; }
 .phase-lock { margin-left: auto; font-size: 13px; opacity: 0.6; }
 
+/* ── creation presets ───────────────────────────────────────────────────── */
+.presets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+.preset {
+  width: auto; display: flex; align-items: center; gap: 9px; justify-content: flex-start;
+  background: var(--glass); color: var(--ink); border: 1px solid var(--line-2);
+  box-shadow: none; font-size: 13.5px; font-weight: 600; padding: 12px 13px; border-radius: 14px;
+  text-align: left;
+}
+.preset:hover:not(:disabled) { transform: translateY(-1px); background: var(--glass-2); box-shadow: none; border-color: var(--violet); }
+.preset.on { border-color: var(--violet); background: rgba(139, 92, 246, 0.14); box-shadow: 0 0 16px -6px rgba(139, 92, 246, 0.6); }
+.preset-emoji { font-size: 18px; flex: none; }
+
 /* ── Training Grounds ───────────────────────────────────────────────────── */
 .train { display: flex; flex-direction: column; gap: 18px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }

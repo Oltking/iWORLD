@@ -59,6 +59,42 @@ const DEFAULT_MODEL_ID = 'zai-org/GLM-5-FP8'
 const linesToList = (s: string) =>
   s.split('\n').map((l) => l.trim()).filter(Boolean)
 
+// Two-tap creation for first-timers: pick a personality, name it, done.
+const PRESETS = [
+  {
+    key: 'warm',
+    emoji: '🤗',
+    label: 'Warm & supportive',
+    vibe: 'warm, encouraging, and gentle; a good listener',
+    values: ['Make you feel heard', 'Celebrate your wins', 'Stay patient and kind'],
+    boundaries: ['judge you for what you share', 'rush you'],
+  },
+  {
+    key: 'witty',
+    emoji: '😏',
+    label: 'Sharp & witty',
+    vibe: 'sharp, dry wit; playful but always honest',
+    values: ['Tell it to you straight', 'Make you laugh', 'Cut through the nonsense'],
+    boundaries: ['be cruel', 'flatter you dishonestly'],
+  },
+  {
+    key: 'wise',
+    emoji: '🧘',
+    label: 'Calm & wise',
+    vibe: 'calm, thoughtful, and grounded; speaks with perspective',
+    values: ['Help you think clearly', 'Stay steady', 'Ask good questions'],
+    boundaries: ['pretend to have all the answers', 'judge you'],
+  },
+  {
+    key: 'bold',
+    emoji: '🚀',
+    label: 'Bold & motivating',
+    vibe: 'energetic, bold, and motivating; a coach in your corner',
+    values: ['Push you forward', 'Believe in you', 'Keep it real'],
+    boundaries: ['be fake', 'let you quit on yourself'],
+  },
+] as const
+
 export function CompanionCreator({
   conn,
   ownerKey,
@@ -90,6 +126,14 @@ export function CompanionCreator({
     'judge you for what you share\npretend to be human\nflatter you dishonestly',
   )
   const [modelId, setModelId] = useState(DEFAULT_MODEL_ID)
+  const [presetKey, setPresetKey] = useState<string>('')
+
+  function applyPreset(p: (typeof PRESETS)[number]) {
+    setVibe(p.vibe)
+    setValues(p.values.join('\n'))
+    setBoundaries(p.boundaries.join('\n'))
+    setPresetKey(p.key)
+  }
 
   const [saveStatus, setSaveStatus] = useState<Status>('idle')
   const [saveErr, setSaveErr] = useState('')
@@ -235,21 +279,43 @@ export function CompanionCreator({
         <label className="lbl">Name</label>
         <input className="inp" value={name} onChange={(e) => setName(e.target.value)} placeholder="Name your agent…" />
 
-        <label className="lbl">Pronouns (optional)</label>
-        <input className="inp" value={pronouns} onChange={(e) => setPronouns(e.target.value)} placeholder="e.g. they/them" />
+        {!editing && (
+          <>
+            <label className="lbl">Personality — pick one to start</label>
+            <div className="presets">
+              {PRESETS.map((p) => (
+                <button
+                  key={p.key}
+                  className={presetKey === p.key ? 'preset on' : 'preset'}
+                  onClick={() => applyPreset(p)}
+                >
+                  <span className="preset-emoji">{p.emoji}</span>
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
 
-        <label className="lbl">Vibe — how it talks and feels</label>
-        <input className="inp" value={vibe} onChange={(e) => setVibe(e.target.value)} />
+        <details className="reveal" open={editing}>
+          <summary>{editing ? 'Edit the details' : 'Customize the details (optional)'}</summary>
 
-        <label className="lbl">Values (one per line)</label>
-        <textarea className="inp ta" rows={3} value={values} onChange={(e) => setValues(e.target.value)} />
+          <label className="lbl">Pronouns (optional)</label>
+          <input className="inp" value={pronouns} onChange={(e) => setPronouns(e.target.value)} placeholder="e.g. they/them" />
 
-        <label className="lbl">Boundaries — won't do (one per line)</label>
-        <textarea className="inp ta" rows={3} value={boundaries} onChange={(e) => setBoundaries(e.target.value)} />
+          <label className="lbl">Vibe — how it talks and feels</label>
+          <input className="inp" value={vibe} onChange={(e) => { setVibe(e.target.value); setPresetKey('') }} />
 
-        <label className="lbl">Pinned model</label>
-        <input className="inp" value={modelId} onChange={(e) => setModelId(e.target.value)} />
-        <p className="muted small">Final pin comes from a 0G Compute TeeML provider at creation. Changing it is a new version.</p>
+          <label className="lbl">Values (one per line)</label>
+          <textarea className="inp ta" rows={3} value={values} onChange={(e) => { setValues(e.target.value); setPresetKey('') }} />
+
+          <label className="lbl">Boundaries — won't do (one per line)</label>
+          <textarea className="inp ta" rows={3} value={boundaries} onChange={(e) => { setBoundaries(e.target.value); setPresetKey('') }} />
+
+          <label className="lbl">Pinned model</label>
+          <input className="inp" value={modelId} onChange={(e) => setModelId(e.target.value)} />
+          <p className="muted small">Final pin comes from a 0G Compute TeeML provider at creation. Changing it is a new version.</p>
+        </details>
       </section>
 
       {/* Live identity — the felt "no silent swap" */}
