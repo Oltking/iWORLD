@@ -28,6 +28,7 @@ import {
   type Broker,
   type InferenceService,
 } from '../lib/compute'
+import { relayConfigured, relayChat } from '../lib/compute-relay'
 import { loadPersonality } from '../lib/companion-store'
 import { loadKnowledge, knowledgeHeadKey, knowledgePromptBlock } from '../lib/knowledge-store'
 import { conversationHeadKey, type ActiveCompanion } from '../lib/session'
@@ -195,6 +196,7 @@ export function Chat({
   }, [knownCount, head, savedCount, initial])
 
   const unsaved = messages.length - savedCount
+  const sharedTee = relayConfigured() // shared pool available → chat works without self-funding
 
   async function onActivate() {
     const broker = brokerRef.current
@@ -222,7 +224,10 @@ export function Chat({
 
     const broker = brokerRef.current
     const provider = providerRef.current
-    if (compute === 'active' && broker && provider) {
+    const ownActive = compute === 'active' && !!broker && !!provider
+    const useRelay = !ownActive && relayConfigured()
+
+    if (ownActive || useRelay) {
       setThinking(true)
       try {
         const history = next
@@ -231,7 +236,9 @@ export function Chat({
         const msgs = systemPromptRef.current
           ? [{ role: 'system' as const, content: systemPromptRef.current }, ...history]
           : history
-        const res = await runInference(broker, provider, msgs)
+        const res = ownActive
+          ? await runInference(broker!, provider!, msgs)
+          : await relayChat(conn.signer, msgs)
         setMessages((m) => [
           ...m,
           {
@@ -242,15 +249,14 @@ export function Chat({
               modelId: res.model,
               providerAddr: res.provider,
               chatId: res.chatID,
-              teeVerified: res.teeVerified, // the real, earned value
+              teeVerified: res.teeVerified, // own path: earned; shared path: null (honest)
               personalityVersion: companion.version,
             },
           },
         ])
       } catch (e) {
         const msg = (e as Error).message
-        // A funding-shaped failure → nudge re-activation.
-        if (/sub-account|ledger|insufficient|fund/i.test(msg)) setCompute('inactive')
+        if (ownActive && /sub-account|ledger|insufficient|fund/i.test(msg)) setCompute('inactive')
         setMessages((m) => [
           ...m,
           {
@@ -325,11 +331,11 @@ export function Chat({
             🔒 private{knownCount > 0 ? ` · 🧠 remembers ${knownCount}` : ' · owned on 0G'}
           </span>
         </div>
-        <ComputeBadge state={compute} />
+        <ComputeBadge state={compute} shared={sharedTee} />
       </div>
 
-      {/* TEE chat activation — explicit, one-time, never mid-chat */}
-      {ownerKey && compute === 'inactive' && (
+      {/* Activation — only a hard blocker when there's no shared pool to fall back on. */}
+      {ownerKey && compute === 'inactive' && !sharedTee && (
         <div className={`tee-panel ${activateStatus}`}>
           <p className="muted small">
             <strong>Turn on TEE chat.</strong> One-time setup opens your 0G Compute ledger and funds a
@@ -342,7 +348,17 @@ export function Chat({
           {activateErr && <p className="err">{activateErr}</p>}
         </div>
       )}
-      {compute === 'unavailable' && (
+      {sharedTee && compute !== 'active' && (
+        <p className="muted small center">
+          🔒 Shared TEE chat — real, private inference on a shared pool.{' '}
+          {ownerKey && compute === 'inactive' && (
+            <button className="linklike" onClick={onActivate} disabled={activateStatus === 'busy'}>
+              {activateStatus === 'busy' ? 'activating…' : 'go unlimited & fully private →'}
+            </button>
+          )}
+        </p>
+      )}
+      {compute === 'unavailable' && !sharedTee && (
         <p className="muted small center">Compute is offline right now — chatting in private preview mode.</p>
       )}
 
@@ -402,13 +418,17 @@ function ctx_provider(): string | undefined {
   return (import.meta.env.VITE_ZG_COMPUTE_PROVIDER_ADDR as string | undefined) || undefined
 }
 
-function ComputeBadge({ state }: { state: ComputeState }) {
-  const map = {
-    checking: { cls: 'pending', label: '◌ TEE…' },
-    inactive: { cls: 'pending', label: '○ TEE off' },
-    active: { cls: 'ok', label: '✓ TEE on' },
-    unavailable: { cls: 'error', label: '✕ offline' },
-  } as const
-  const m = map[state]
+function ComputeBadge({ state, shared }: { state: ComputeState; shared: boolean }) {
+  // Own funded ledger wins; otherwise the shared pool keeps chat live + private.
+  const m =
+    state === 'active'
+      ? { cls: 'ok', label: '✓ TEE on' }
+      : shared
+        ? { cls: 'ok', label: '🔒 TEE · shared' }
+        : state === 'checking'
+          ? { cls: 'pending', label: '◌ TEE…' }
+          : state === 'unavailable'
+            ? { cls: 'error', label: '✕ offline' }
+            : { cls: 'pending', label: '○ TEE off' }
   return <span className={`tee-badge ${m.cls}`}>{m.label}</span>
 }

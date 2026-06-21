@@ -504,6 +504,8 @@ code {
 .tee-badge.error { color: var(--coral); border-color: rgba(251, 113, 133, 0.4); }
 .tee-panel { background: linear-gradient(120deg, rgba(139, 92, 246, 0.14), rgba(34, 211, 238, 0.08)); border: 1px solid rgba(139, 92, 246, 0.4); border-radius: 16px; padding: 14px; }
 .tee-panel button { margin-top: 10px; }
+.linklike { width: auto; background: none; box-shadow: none; color: var(--cyan); padding: 0; font-size: inherit; font-weight: 700; text-decoration: underline; }
+.linklike:hover:not(:disabled) { transform: none; box-shadow: none; }
 
 /* typing indicator */
 .typing { display: inline-flex; gap: 5px; align-items: center; padding: 4px 2px; }

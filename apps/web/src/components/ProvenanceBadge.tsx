@@ -9,12 +9,15 @@ import type { MessageProvenance } from '../lib/conversation-store'
 const shortModel = (m: string) => m.split('/').pop() ?? m
 
 export function ProvenanceBadge({ p, currentVersion }: { p: MessageProvenance; currentVersion?: string }) {
+  const realProvider = !!p.providerAddr && !/^0x0+$/i.test(p.providerAddr)
   const tee =
     p.teeVerified === true
       ? { cls: 'ok', label: '✓ TEE-verified' }
       : p.teeVerified === false
         ? { cls: 'error', label: '✕ unverified' }
-        : { cls: 'pending', label: '◌ TEE pending' }
+        : realProvider
+          ? { cls: 'ok', label: '🔒 TEE · shared' } // real TeeML provider via the shared pool
+          : { cls: 'pending', label: '◌ local' }
   const older = !!currentVersion && p.personalityVersion !== currentVersion
 
   return (
