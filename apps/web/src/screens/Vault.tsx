@@ -8,10 +8,12 @@
  *           permanence: the encrypted blobs persist on 0G but are useless without your
  *           key — discarding the key/pointers is a cryptographic erasure.
  */
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { isAddress } from 'ethers'
 import type { Connection } from '../lib/wallet'
 import { buildExport, downloadJson, parseExport, type KiprExport } from '../lib/export'
 import { conversationHeadKey, type ActiveCompanion } from '../lib/session'
+import { transferConfigured, hasTransferKey, registerToReceive, transferAgent, claimAgent } from '../lib/transfer'
 import type { Status } from '../components/Dot'
 
 export function Vault({
@@ -20,12 +22,14 @@ export function Vault({
   companion,
   onRestore,
   onDelete,
+  onClaimed,
 }: {
   conn: Connection
   ownerKey: CryptoKey | null
   companion: ActiveCompanion | null
   onRestore: (exp: KiprExport) => void
   onDelete: () => void
+  onClaimed: (c: ActiveCompanion) => void
 }) {
   const [exportStatus, setExportStatus] = useState<Status>('idle')
   const [exportErr, setExportErr] = useState('')
@@ -33,6 +37,65 @@ export function Vault({
   const [importOk, setImportOk] = useState('')
   const [confirmDelete, setConfirmDelete] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+
+  const [registered, setRegistered] = useState<boolean | null>(null)
+  const [regStatus, setRegStatus] = useState<Status>('idle')
+  const [sendTo, setSendTo] = useState('')
+  const [sendStatus, setSendStatus] = useState<Status>('idle')
+  const [transferMsg, setTransferMsg] = useState('')
+  const [transferErr, setTransferErr] = useState('')
+  const [claimToken, setClaimToken] = useState('')
+  const [claimStatus, setClaimStatus] = useState<Status>('idle')
+
+  useEffect(() => {
+    if (!transferConfigured()) return
+    hasTransferKey(conn.provider, conn.address).then(setRegistered).catch(() => setRegistered(false))
+  }, [conn])
+
+  async function onRegister() {
+    setRegStatus('busy')
+    setTransferErr('')
+    try {
+      await registerToReceive(conn.signer, conn.address)
+      setRegistered(true)
+      setRegStatus('ok')
+    } catch (e) {
+      setTransferErr((e as Error).message)
+      setRegStatus('error')
+    }
+  }
+
+  async function onSend() {
+    if (!ownerKey || !companion || !isAddress(sendTo)) return
+    setSendStatus('busy')
+    setTransferErr('')
+    setTransferMsg('')
+    try {
+      await transferAgent(conn.signer, ownerKey, companion, sendTo)
+      setTransferMsg(`✓ ${companion.name} transferred — brain and all. They can claim it now.`)
+      setSendStatus('ok')
+      setTimeout(onDelete, 2500) // you gave it away; clear local state
+    } catch (e) {
+      setTransferErr((e as Error).message)
+      setSendStatus('error')
+    }
+  }
+
+  async function onClaim() {
+    if (!ownerKey || !claimToken) return
+    setClaimStatus('busy')
+    setTransferErr('')
+    setTransferMsg('')
+    try {
+      const c = await claimAgent(conn.signer, ownerKey, claimToken)
+      setTransferMsg(`✓ Claimed ${c.name} (Agent #${c.tokenId}) — it’s yours now, brain and all.`)
+      setClaimStatus('ok')
+      onClaimed(c)
+    } catch (e) {
+      setTransferErr((e as Error).message)
+      setClaimStatus('error')
+    }
+  }
 
   async function onExport() {
     if (!ownerKey || !companion) return
@@ -118,6 +181,56 @@ export function Vault({
         {importOk && <div className="okbox"><p>✓ {importOk}</p></div>}
         {importErr && <p className="err">{importErr}</p>}
       </section>
+
+      {/* Transfer — the re-keyed brain handoff */}
+      {transferConfigured() && (
+        <section className={`card ${sendStatus}`}>
+          <div className="card-h">
+            <span className="step">🤝</span>
+            <h2>Transfer &amp; receive</h2>
+          </div>
+          <p className="muted small">
+            Hand an agent to someone — <strong>brain and all</strong>. It’s re-sealed so only they can open it.
+            Register once to be able to receive agents yourself.
+          </p>
+
+          {registered === false ? (
+            <button onClick={onRegister} disabled={regStatus === 'busy'}>
+              {regStatus === 'busy' ? 'Sign + register…' : 'Register to receive agents'}
+            </button>
+          ) : registered ? (
+            <p className="muted small">✓ Registered to receive agents.</p>
+          ) : (
+            <p className="muted small">Checking…</p>
+          )}
+
+          {companion?.tokenId && (
+            <div style={{ marginTop: 12 }}>
+              <label className="lbl">Send {companion.name} (Agent #{companion.tokenId}) to</label>
+              <div className="composer">
+                <input className="inp" value={sendTo} onChange={(e) => setSendTo(e.target.value)} placeholder="0x recipient address" />
+                <button className="send" onClick={onSend} disabled={sendStatus === 'busy' || !ownerKey || !isAddress(sendTo)} style={{ width: 'auto', borderRadius: 12, padding: '0 16px' }}>
+                  {sendStatus === 'busy' ? '…' : 'Send'}
+                </button>
+              </div>
+              <p className="muted small">The recipient must have registered first.</p>
+            </div>
+          )}
+
+          <div style={{ marginTop: 12 }}>
+            <label className="lbl">Claim an agent sent to you</label>
+            <div className="composer">
+              <input className="inp" value={claimToken} onChange={(e) => setClaimToken(e.target.value)} placeholder="Agent token # you now own" inputMode="numeric" />
+              <button className="send" onClick={onClaim} disabled={claimStatus === 'busy' || !ownerKey || !claimToken} style={{ width: 'auto', borderRadius: 12, padding: '0 16px' }}>
+                {claimStatus === 'busy' ? '…' : 'Claim'}
+              </button>
+            </div>
+          </div>
+
+          {transferMsg && <div className="okbox"><p>{transferMsg}</p></div>}
+          {transferErr && <p className="err">{transferErr}</p>}
+        </section>
+      )}
 
       {/* Delete */}
       <section className="card danger">

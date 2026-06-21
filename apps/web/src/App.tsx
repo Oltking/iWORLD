@@ -271,7 +271,18 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
               ) : view === 'market' && conn ? (
                 <Market conn={conn} companion={companion} />
               ) : view === 'vault' && conn ? (
-                <Vault conn={conn} ownerKey={ownerKey} companion={companion} onRestore={onRestore} onDelete={onDelete} />
+                <Vault
+                  conn={conn}
+                  ownerKey={ownerKey}
+                  companion={companion}
+                  onRestore={onRestore}
+                  onDelete={onDelete}
+                  onClaimed={(c) => {
+                    setCompanion(c)
+                    setRestoredInitial(null)
+                    setView('world')
+                  }}
+                />
               ) : companion && view === 'chat' && conn ? (
                 <Chat
                   key={companion.ownerAddr}
