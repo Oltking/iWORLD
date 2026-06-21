@@ -91,6 +91,7 @@ export function Chat({
   const systemPromptRef = useRef<string>('')
   const endRef = useRef<HTMLDivElement>(null)
   const autoLoadedRef = useRef(false)
+  const greetedRef = useRef(false)
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -172,6 +173,26 @@ export function Chat({
       cancelled = true
     }
   }, [ownerKey, companion.ownerAddr])
+
+  // Return bonding: if this is a fresh chat (no saved history) but the agent has been
+  // taught things, greet so it feels like coming back to someone who knows you.
+  useEffect(() => {
+    if (greetedRef.current) return
+    if (initial?.messages.length || head || savedCount > 0 || messages.length > 1) return
+    if (knownCount <= 0) return
+    greetedRef.current = true
+    setMessages([
+      {
+        role: 'assistant',
+        content:
+          `Good to see you again. I’ve got the ${knownCount} thing${knownCount === 1 ? '' : 's'} ` +
+          `you’ve taught me close — what’s on your mind?`,
+        createdAt: now(),
+        provenance: localProv(),
+      },
+    ])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [knownCount, head, savedCount, initial])
 
   const unsaved = messages.length - savedCount
 
