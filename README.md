@@ -61,7 +61,7 @@ the single most important architecture call — no per-agent full fine-tune.
 | 5–6 — Social world | guilds · breeding · many worlds · portability | planned |
 | 7+ — Scale & decentralize | progressive decentralization, events, ecosystem | planned |
 
-Full plan: [`docs/iWORLD_master_plan.md`](docs/iWORLD_master_plan.md).
+The full decade master plan is maintained privately.
 
 ---
 
@@ -74,9 +74,10 @@ packages/og      — verified 0G integration (chain, encrypted storage, TEE comp
 packages/core    — agent domain: personality, content-hash versioning, owned memory
 packages/server  — derivable cache/index + the sponsored-onboarding funder service
 apps/web         — the client: iWORLD hub, create, chat, own, export — React + Vite
-docs/            — master plan, product spec, API appendix
 research/        — the verified 0G research corpus (source of truth for every 0G call)
 ```
+
+*(Internal product specs, plans, and the master plan are kept private.)*
 
 ### Non-negotiables (enforced, not aspirational)
 1. **Privacy is load-bearing** — production inference runs through 0G Compute TEE; no

@@ -17,6 +17,9 @@ reports/
 smoke-output/
 *.log
 
+# internal docs / specs / ideas — keep private, not in the public repo
+docs/
+
 # research corpus is large; keep specs + index, ignore cloned repos & raw dumps
 research/github/
 research/website/0g.ai_homepage_raw.html
