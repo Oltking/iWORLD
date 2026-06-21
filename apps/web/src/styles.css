@@ -390,6 +390,12 @@ code {
 .kitem.feedback { border-color: rgba(139, 92, 246, 0.3); background: rgba(139, 92, 246, 0.07); }
 .kkind { flex: none; color: var(--cyan); }
 .kitem.feedback .kkind { color: var(--violet); }
+.ktext { flex: 1; }
+.kx { width: auto; background: none; box-shadow: none; color: var(--faint); padding: 0 4px; font-size: 13px; flex: none; opacity: 0.5; }
+.kx:hover:not(:disabled) { opacity: 1; color: var(--coral); transform: none; box-shadow: none; }
+.kforget { flex: none; display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--coral); }
+.klink { width: auto; background: none; box-shadow: none; color: var(--coral); font-weight: 700; padding: 0 2px; font-size: 12px; }
+.klink:hover:not(:disabled) { transform: none; box-shadow: none; text-decoration: underline; }
 .ack {
   display: flex; align-items: center; gap: 10px; margin-top: 12px;
   padding: 10px 13px; border-radius: 14px; font-size: 14px; color: var(--ink);

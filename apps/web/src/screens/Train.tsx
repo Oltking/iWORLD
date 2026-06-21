@@ -49,6 +49,7 @@ export function Train({
   const [status, setStatus] = useState<Status>('idle')
   const [err, setErr] = useState('')
   const [ack, setAck] = useState('')
+  const [forgetIdx, setForgetIdx] = useState<number | null>(null)
   const loadedRef = useRef(false)
   const taRef = useRef<HTMLTextAreaElement>(null)
 
@@ -98,6 +99,37 @@ export function Train({
 
   function teachFeedback(t: string, kind: KnowledgeKind = 'feedback') {
     void teach([{ text: t, kind, createdAt: now() }])
+  }
+
+  // Forget a learned item: re-persist the remaining set as a fresh knowledge chain so
+  // the agent no longer knows it. The old blobs stay on 0G but are no longer pointed to.
+  async function forget(originalIndex: number) {
+    if (!ownerKey) return
+    const remaining = items.filter((_, idx) => idx !== originalIndex)
+    setStatus('busy')
+    setErr('')
+    setAck('')
+    setForgetIdx(null)
+    try {
+      if (remaining.length === 0) {
+        localStorage.removeItem(knowledgeHeadKey(companion.ownerAddr))
+        setHead(null)
+        setItems([])
+      } else {
+        const ref = await appendKnowledge(conn.signer, ownerKey, {
+          companion: companion.ownerAddr,
+          head: null, // rewrite as a fresh genesis holding only what remains
+          items: remaining,
+        })
+        setHead(ref.head)
+        localStorage.setItem(knowledgeHeadKey(companion.ownerAddr), ref.head)
+        setItems(remaining)
+      }
+      setStatus('ok')
+    } catch (e) {
+      setErr((e as Error).message)
+      setStatus('error')
+    }
   }
 
   const busy = status === 'busy'
@@ -179,12 +211,24 @@ export function Train({
             <span className="badge">{items.length}</span>
           </div>
           <ul className="knowledge">
-            {[...items].reverse().map((it, i) => (
-              <li key={i} className={`kitem ${it.kind}`}>
-                <span className="kkind">{it.kind === 'fact' ? '✦' : '✎'}</span>
-                {it.text}
-              </li>
-            ))}
+            {[...items].reverse().map((it, i) => {
+              const orig = items.length - 1 - i
+              return (
+                <li key={orig} className={`kitem ${it.kind}`}>
+                  <span className="kkind">{it.kind === 'fact' ? '✦' : '✎'}</span>
+                  <span className="ktext">{it.text}</span>
+                  {forgetIdx === orig ? (
+                    <span className="kforget">
+                      forget?
+                      <button className="klink" onClick={() => forget(orig)} disabled={busy}>yes</button>
+                      <button className="klink" onClick={() => setForgetIdx(null)}>no</button>
+                    </span>
+                  ) : (
+                    <button className="kx" title="Forget this" onClick={() => setForgetIdx(orig)} disabled={busy}>✕</button>
+                  )}
+                </li>
+              )
+            })}
           </ul>
           {head && (
             <p className="muted small center">encrypted on 0G · head {head.slice(0, 12)}… · yours</p>
