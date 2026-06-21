@@ -1,5 +1,7 @@
 # CLAUDE.md — KIPR (read this first)
 
+> **iWORLD** is the umbrella project (a living world of owned, evolving AI agents on 0G — see `README.md` + `docs/iWORLD_master_plan.md`). **KIPR is its Phase-1 pillar**: the one magic agent (create · own · talk · grow). Repo: github.com/Oltking/iWORLD. Discipline = depth before breadth.
+
 ## What we're building
 **KIPR** — a private AI companion that's truly yours. Conversations run inside a TEE so they're never harvested, and the companion's memory + personality live in storage the user owns, so no company can alter, censor, or take it away. Built on **0G (Zero Gravity)**: 0G Compute for TEE-verified inference, 0G Storage for user-owned encrypted memory, 0G Chain (EVM) for identity/settlement.
 
