@@ -1,7 +1,7 @@
 /**
  * Client-side encryption (non-negotiable #3). The browser can't read the wallet's
  * private key (MetaMask only signs), so — unlike the server's ECIES-to-self path —
- * KIPR derives a symmetric key from a DETERMINISTIC wallet signature:
+ * iWORLD derives a symmetric key from a DETERMINISTIC wallet signature:
  *
  *   sig = wallet.sign(fixed message bound to the account)   ← deterministic (RFC 6979)
  *   key = HKDF-SHA256(sig)                                  ← AES-256-GCM key
@@ -29,8 +29,21 @@ const enc = new TextEncoder()
 // ArrayBuffer-backed here, so coerce for the Web Crypto calls.
 const bs = (u: Uint8Array): BufferSource => u as unknown as BufferSource
 
-/** The exact message the user signs to unlock. Bound to the account; stable forever. */
+/** The exact message the user signs to unlock — its signature IS the encryption key. */
 export function keyDerivationMessage(address: string): string {
+  return [
+    'iWORLD key derivation v1',
+    '',
+    'Sign to unlock your private agents.',
+    'This signature is your encryption key — it never leaves your device.',
+    'Only sign this on iWORLD.',
+    `Account: ${address.toLowerCase()}`,
+  ].join('\n')
+}
+
+/** The original (pre-rebrand) message — kept so agents created before the rebrand still
+ * decrypt. Derived on demand only when a new-key decrypt fails; never change these bytes. */
+function legacyKeyDerivationMessage(address: string): string {
   return [
     'KIPR key derivation v1',
     '',
@@ -41,17 +54,13 @@ export function keyDerivationMessage(address: string): string {
   ].join('\n')
 }
 
-/** Derive the AES-256-GCM owner key from a one-time wallet signature. */
-export async function deriveOwnerKey(signer: MessageSigner, address: string): Promise<CryptoKey> {
-  const signature = await signer.signMessage(keyDerivationMessage(address))
-  const material = await crypto.subtle.importKey('raw', bs(getBytes(signature)), 'HKDF', false, [
-    'deriveKey',
-  ])
+async function keyFromSignature(signature: string): Promise<CryptoKey> {
+  const material = await crypto.subtle.importKey('raw', bs(getBytes(signature)), 'HKDF', false, ['deriveKey'])
   return crypto.subtle.deriveKey(
     {
       name: 'HKDF',
       hash: 'SHA-256',
-      salt: bs(enc.encode('kipr.storage.salt.v1')),
+      salt: bs(enc.encode('kipr.storage.salt.v1')), // internal salt — keep stable (invisible to users)
       info: bs(enc.encode('kipr:aes-256-gcm')),
     },
     material,
@@ -59,6 +68,28 @@ export async function deriveOwnerKey(signer: MessageSigner, address: string): Pr
     false,
     ['encrypt', 'decrypt'],
   )
+}
+
+// Remember who's unlocked so we can lazily derive the legacy (KIPR) key — signing the old
+// message only if a pre-rebrand blob fails to open with the new key.
+let _signer: MessageSigner | null = null
+let _address: string | null = null
+let _legacyKey: CryptoKey | null = null
+
+/** Derive the AES-256-GCM owner key from a one-time wallet signature. */
+export async function deriveOwnerKey(signer: MessageSigner, address: string): Promise<CryptoKey> {
+  _signer = signer
+  _address = address.toLowerCase()
+  _legacyKey = null
+  return keyFromSignature(await signer.signMessage(keyDerivationMessage(address)))
+}
+
+/** Lazily derive (and cache) the legacy key for reading pre-rebrand data. */
+async function legacyOwnerKey(): Promise<CryptoKey | null> {
+  if (_legacyKey) return _legacyKey
+  if (!_signer || !_address) return null
+  _legacyKey = await keyFromSignature(await _signer.signMessage(legacyKeyDerivationMessage(_address)))
+  return _legacyKey
 }
 
 /**
@@ -103,6 +134,16 @@ export async function decryptOwned(key: CryptoKey, blob: Uint8Array): Promise<Ui
   try {
     return new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: bs(iv) }, key, bs(ct)))
   } catch {
+    // Might be a pre-rebrand (KIPR-key) blob — derive the legacy key on demand and retry.
+    // Any subsequent re-save uses the new key, migrating the data forward automatically.
+    const lk = await legacyOwnerKey().catch(() => null)
+    if (lk) {
+      try {
+        return new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: bs(iv) }, lk, bs(ct)))
+      } catch {
+        /* legacy key didn't work either */
+      }
+    }
     throw new Error('Decryption failed — wrong key or corrupt data.')
   }
 }
