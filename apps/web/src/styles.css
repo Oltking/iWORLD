@@ -102,7 +102,7 @@ body {
 
 /* ── Desktop: sidebar layout ────────────────────────────────────────────── */
 @media (min-width: 900px) {
-  .wrap { max-width: 1180px; padding: 32px 32px calc(40px + env(safe-area-inset-bottom)); }
+  .wrap { max-width: 1280px; padding: 32px 36px calc(40px + env(safe-area-inset-bottom)); }
   .shell { display: grid; grid-template-columns: 256px minmax(0, 1fr); gap: 34px; align-items: start; }
   .hd {
     position: sticky; top: 28px; margin-bottom: 0; padding: 18px;
@@ -129,7 +129,7 @@ body {
 /* ── Desktop reading widths (keep text + chat comfortable, not sprawled) ─── */
 .hero { max-width: 620px; margin-inline: auto; }
 @media (min-width: 900px) {
-  .shell { grid-template-columns: 240px minmax(0, 820px); gap: 36px; justify-content: center; }
+  .shell { grid-template-columns: 248px minmax(0, 900px); gap: 38px; justify-content: center; }
   .hd .signout { width: 100%; text-align: center; margin-top: 14px; }
   .chat { max-width: 720px; margin-inline: auto; width: 100%; }
   .welcome { max-width: 560px; margin-inline: auto; }
@@ -655,7 +655,7 @@ code {
 }
 .devlink:hover:not(:disabled) { transform: none; box-shadow: none; color: var(--muted); background: rgba(255,255,255,0.04); }
 
-.lowfunds.health { border-color: rgba(248,113,113,0.45); background: rgba(248,113,113,0.08); }
+/* Network notice reads as a calm amber heads-up (recoverable), not an alarming red error. */
 .lowfunds.health .chip-btn { flex: none; }
 
 /* ── World action launcher ──────────────────────────────────────────────── */
