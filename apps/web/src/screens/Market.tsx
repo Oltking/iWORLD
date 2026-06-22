@@ -8,6 +8,7 @@ import { formatEther, parseEther } from 'ethers'
 import type { Connection } from '../lib/wallet'
 import type { ActiveCompanion } from '../lib/session'
 import { fetchListings, listAgent, buyAgent, cancelListing, type Listing } from '../lib/market'
+import { toast, humanizeError } from '../lib/toast'
 import { OG_TESTNET } from '../lib/og'
 import { CompanionOrb } from '../components/CompanionOrb'
 import type { Status } from '../components/Dot'
@@ -47,21 +48,22 @@ export function Market({ conn, companion }: { conn: Connection; companion: Activ
       await listAgent(conn.signer, companion.tokenId, parseEther(price))
       setPrice('')
       setListStatus('ok')
+      toast.success(`${companion.name} is listed for ${price} 0G 🏷️`)
       await refresh()
     } catch (e) {
-      setErr((e as Error).message)
       setListStatus('error')
+      toast.error(humanizeError(e))
     }
   }
 
   async function onBuy(l: Listing) {
     setBusyToken(l.tokenId)
-    setErr('')
     try {
       await buyAgent(conn.signer, l.tokenId, l.price)
+      toast.success(`Bought Agent #${l.tokenId} — it’s yours now 🎉`)
       await refresh()
     } catch (e) {
-      setErr((e as Error).message)
+      toast.error(humanizeError(e))
     } finally {
       setBusyToken('')
     }
@@ -69,12 +71,12 @@ export function Market({ conn, companion }: { conn: Connection; companion: Activ
 
   async function onCancel(l: Listing) {
     setBusyToken(l.tokenId)
-    setErr('')
     try {
       await cancelListing(conn.signer, l.tokenId)
+      toast.success(`Listing for Agent #${l.tokenId} cancelled`)
       await refresh()
     } catch (e) {
-      setErr((e as Error).message)
+      toast.error(humanizeError(e))
     } finally {
       setBusyToken('')
     }

@@ -14,6 +14,7 @@ import type { Connection } from '../lib/wallet'
 import { buildExport, downloadJson, parseExport, type KiprExport } from '../lib/export'
 import { conversationHeadKey, type ActiveCompanion } from '../lib/session'
 import { transferConfigured, hasTransferKey, registerToReceive, transferAgent, claimAgent } from '../lib/transfer'
+import { toast, humanizeError } from '../lib/toast'
 import type { Status } from '../components/Dot'
 
 export function Vault({
@@ -59,9 +60,11 @@ export function Vault({
       await registerToReceive(conn.signer, conn.address)
       setRegistered(true)
       setRegStatus('ok')
+      toast.success('Registered — people can now hand you agents 🤝')
     } catch (e) {
       setTransferErr((e as Error).message)
       setRegStatus('error')
+      toast.error(humanizeError(e))
     }
   }
 
@@ -74,10 +77,12 @@ export function Vault({
       await transferAgent(conn.signer, ownerKey, companion, sendTo)
       setTransferMsg(`✓ ${companion.name} transferred — brain and all. They can claim it now.`)
       setSendStatus('ok')
+      toast.success(`${companion.name} sent — brain and all 🤝`)
       setTimeout(onDelete, 2500) // you gave it away; clear local state
     } catch (e) {
       setTransferErr((e as Error).message)
       setSendStatus('error')
+      toast.error(humanizeError(e))
     }
   }
 
@@ -90,10 +95,12 @@ export function Vault({
       const c = await claimAgent(conn.signer, ownerKey, claimToken)
       setTransferMsg(`✓ Claimed ${c.name} (Agent #${c.tokenId}) — it’s yours now, brain and all.`)
       setClaimStatus('ok')
+      toast.success(`Claimed ${c.name} — brain and all 🎉`)
       onClaimed(c)
     } catch (e) {
       setTransferErr((e as Error).message)
       setClaimStatus('error')
+      toast.error(humanizeError(e))
     }
   }
 

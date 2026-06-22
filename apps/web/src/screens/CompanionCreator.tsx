@@ -26,6 +26,7 @@ import type { ActiveCompanion } from '../lib/session'
 import { persistPersonality, loadPersonality } from '../lib/companion-store'
 import { mintAgent, agentNftConfigured, type MintResult } from '../lib/mint'
 import { addVersion, getVersions } from '../lib/personality-history'
+import { toast, humanizeError } from '../lib/toast'
 import { OG_TESTNET } from '../lib/og'
 import { Dot, type Status } from '../components/Dot'
 import { CompanionOrb } from '../components/CompanionOrb'
@@ -242,9 +243,11 @@ export function CompanionCreator({
         version: ref.version,
         personalityRootHash: ref.rootHash,
       })
+      toast.success(`${config.name} is alive — saved to 0G, yours alone ✨`)
     } catch (e) {
       setSaveErr((e as Error).message)
       setSaveStatus('error')
+      toast.error(humanizeError(e))
     }
   }
 
@@ -263,9 +266,11 @@ export function CompanionCreator({
       setMinted(res)
       setMintStatus('ok')
       if (res.tokenId) onMinted(res.tokenId)
+      toast.success(`Minted! ${config.name} is Agent #${res.tokenId ?? '—'}, yours on-chain 🪙`)
     } catch (e) {
       setMintErr((e as Error).message)
       setMintStatus('error')
+      toast.error(humanizeError(e))
     }
   }
 
