@@ -603,3 +603,30 @@ code {
   text-underline-offset: 2px;
 }
 .devlink:hover:not(:disabled) { transform: none; box-shadow: none; color: var(--muted); background: rgba(255,255,255,0.04); }
+
+/* ── Accessibility ──────────────────────────────────────────────────────── */
+/* Visible keyboard focus on every interactive element. */
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--cyan); outline-offset: 2px; border-radius: 8px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+  .aurora .blob { animation: none; }
+}
+
+/* ── Mobile pass ────────────────────────────────────────────────────────── */
+@media (max-width: 560px) {
+  /* Tabs: scroll horizontally instead of squishing to unreadable widths. */
+  .tabs { overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { flex: 0 0 auto; min-width: 64px; font-size: 13px; padding: 9px 12px; scroll-snap-align: start; }
+  /* Header chip wraps cleanly. */
+  .hd-row { flex-wrap: wrap; gap: 8px; }
+  .chip, .chip-btn { font-size: 12px; }
+  /* Roomier tap targets + readable hero. */
+  .agent-actions button, .ghost { min-height: 42px; }
+  .brand { font-size: 40px; }
+  .listing { flex-wrap: wrap; }
+  .l-buy { margin-left: auto; }
+  .toaster { bottom: 14px; }
+}

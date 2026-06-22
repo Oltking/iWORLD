@@ -69,7 +69,14 @@ export async function cancelListing(signer: JsonRpcSigner, tokenId: string): Pro
 export async function fetchListings(provider: Provider): Promise<Listing[]> {
   const market = new Contract(MARKET, MARKET_ABI, provider)
   const nft = new Contract(NFT, NFT_ABI, provider)
-  const events = await market.queryFilter!(market.filters!.Listed!())
+  // Scan from genesis, but fall back to a recent window if the RPC caps getLogs range.
+  let events
+  try {
+    events = await market.queryFilter!(market.filters!.Listed!())
+  } catch {
+    const latest = await provider.getBlockNumber()
+    events = await market.queryFilter!(market.filters!.Listed!(), Math.max(0, latest - 9000), latest)
+  }
   const seen = new Set<string>()
   const out: Listing[] = []
   // newest first
