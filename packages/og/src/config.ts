@@ -53,10 +53,16 @@ function optional(name: string): string | undefined {
 
 let cached: KiprOgConfig | null = null
 
+// Public 0G Galileo testnet constants — sane defaults so only ZG_PRIVATE_KEY is required
+// (a hosted relay shouldn't need the operator to set every network URL by hand).
+const DEFAULT_RPC = 'https://evmrpc-testnet.0g.ai'
+const DEFAULT_CHAIN_ID = 16602
+const DEFAULT_INDEXER = 'https://indexer-storage-testnet-turbo.0g.ai'
+
 export function getConfig(): KiprOgConfig {
   if (cached) return cached
 
-  const chainId = Number(required('ZG_CHAIN_ID'))
+  const chainId = Number(optional('ZG_CHAIN_ID') ?? DEFAULT_CHAIN_ID)
   if (!Number.isInteger(chainId)) {
     throw new Error(`ZG_CHAIN_ID must be an integer, got "${process.env.ZG_CHAIN_ID}"`)
   }
@@ -68,10 +74,10 @@ export function getConfig(): KiprOgConfig {
   }
 
   cached = {
-    evmRpc: required('ZG_EVM_RPC'),
+    evmRpc: optional('ZG_EVM_RPC') ?? DEFAULT_RPC,
     chainId,
     privateKey,
-    indexerRpc: required('ZG_INDEXER_RPC'),
+    indexerRpc: optional('ZG_INDEXER_RPC') ?? DEFAULT_INDEXER,
     storageFlowContract: optional('ZG_STORAGE_FLOW_CONTRACT'),
     computeProviderAddr: optional('ZG_COMPUTE_PROVIDER_ADDR'),
     computeModelId: optional('ZG_COMPUTE_MODEL_ID'),

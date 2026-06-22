@@ -126,7 +126,15 @@ async function main() {
 
   app.get('/health', async (_req, res) => {
     const bal = await provider.getBalance(house.address).catch(() => 0n)
-    res.json({ ok: true, house: house.address, houseBalance0G: ethers.formatEther(bal), provider: service.provider, model, dailyQuota: cfg.dailyQuota })
+    res.json({
+      ok: true,
+      house: house.address,
+      houseBalance0G: ethers.formatEther(bal),
+      provider: service.provider,
+      model,
+      storage: !!storeCtx, // false ⇒ storage init failed (check ZG_PRIVATE_KEY)
+      dailyQuota: cfg.dailyQuota,
+    })
   })
 
   app.post('/token', async (req, res) => {
