@@ -133,7 +133,6 @@ body {
   .hd .signout { width: 100%; text-align: center; margin-top: 14px; }
   .chat { max-width: 720px; margin-inline: auto; width: 100%; }
   .welcome { max-width: 560px; margin-inline: auto; }
-  .intro-p, .lede { max-width: 640px; margin-inline: auto; }
 }
 
 .hd { margin-bottom: 2px; }

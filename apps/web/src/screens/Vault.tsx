@@ -146,6 +146,7 @@ export function Vault({
   return (
     <>
       <section className="intro">
+        <p className="world-kicker">Your Vault</p>
         <h2 className="intro-h">Yours to keep</h2>
         <p className="intro-p">
           Take your agent with you, bring one back, or truly let go. No lock-in — this is the whole point of iWORLD.

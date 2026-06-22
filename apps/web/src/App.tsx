@@ -1,8 +1,7 @@
 /**
- * App shell — KIPR's product surface. A warm hero invites you in; once you're
- * connected + unlocked, you create and own your companion. The P0 plumbing harness
- * still exists but is demoted to a "developer tools" view off the footer, so the
- * primary experience reads like a companion, not a test bench.
+ * App shell — iWORLD's product surface. A warm hero invites you in; once you're
+ * connected + unlocked, you create, own, and grow your agents. On desktop the header
+ * becomes a left sidebar; on mobile it sits on top with scrollable tabs.
  */
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import { connectWallet, hasInjectedWallet, type Connection } from './lib/wallet'
