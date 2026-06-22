@@ -12,7 +12,7 @@ import { useEffect, useRef, useState } from 'react'
 import { isAddress } from 'ethers'
 import type { Connection } from '../lib/wallet'
 import { buildExport, downloadJson, parseExport, type KiprExport } from '../lib/export'
-import { conversationHeadKey, type ActiveCompanion } from '../lib/session'
+import { conversationHeadKey, agentIdOf, type ActiveCompanion } from '../lib/session'
 import { transferConfigured, hasTransferKey, registerToReceive, transferAgent, claimAgent } from '../lib/transfer'
 import { toast, humanizeError } from '../lib/toast'
 import { celebrate } from '../lib/celebrate'
@@ -112,7 +112,7 @@ export function Vault({
     setExportStatus('busy')
     setExportErr('')
     try {
-      const head = localStorage.getItem(conversationHeadKey(companion.ownerAddr))
+      const head = localStorage.getItem(conversationHeadKey(agentIdOf(companion)))
       const bundle = await buildExport(ownerKey, {
         owner: conn.address.toLowerCase(),
         personalityRootHash: companion.personalityRootHash,
@@ -148,7 +148,7 @@ export function Vault({
       <section className="intro">
         <h2 className="intro-h">Yours to keep</h2>
         <p className="intro-p">
-          Take your agent with you, bring one back, or truly let go. No lock-in —           point of iWORLD.
+          Take your agent with you, bring one back, or truly let go. No lock-in — this is the whole point of iWORLD.
         </p>
       </section>
 

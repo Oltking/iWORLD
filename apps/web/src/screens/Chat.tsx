@@ -31,7 +31,7 @@ import {
 import { relayConfigured, relayChat } from '../lib/compute-relay'
 import { loadPersonality } from '../lib/companion-store'
 import { loadKnowledge, knowledgeHeadKey, knowledgePromptBlock } from '../lib/knowledge-store'
-import { conversationHeadKey, type ActiveCompanion } from '../lib/session'
+import { conversationHeadKey, agentIdOf, type ActiveCompanion } from '../lib/session'
 import { ProvenanceBadge } from '../components/ProvenanceBadge'
 import { CompanionOrb } from '../components/CompanionOrb'
 import { OG_TESTNET } from '../lib/og'
@@ -40,7 +40,7 @@ import type { Status } from '../components/Dot'
 type ComputeState = 'checking' | 'inactive' | 'active' | 'unavailable'
 
 const now = () => new Date().toISOString()
-const headKey = (c: ActiveCompanion) => conversationHeadKey(c.ownerAddr)
+const headKey = (c: ActiveCompanion) => conversationHeadKey(agentIdOf(c))
 
 export function Chat({
   conn,
@@ -115,7 +115,7 @@ export function Chat({
           const { config } = await loadPersonality(ownerKey, companion.personalityRootHash)
           let prompt = config.systemPrompt
           // Inject what the agent has been taught (Training Grounds) so it actually uses it.
-          const knowHead = localStorage.getItem(knowledgeHeadKey(companion.ownerAddr))
+          const knowHead = localStorage.getItem(knowledgeHeadKey(agentIdOf(companion)))
           if (knowHead) {
             try {
               prompt += knowledgePromptBlock(await loadKnowledge(ownerKey, knowHead))
@@ -164,7 +164,7 @@ export function Chat({
   // preview mode where the compute setup doesn't run.
   useEffect(() => {
     if (!ownerKey) return
-    const knowHead = localStorage.getItem(knowledgeHeadKey(companion.ownerAddr))
+    const knowHead = localStorage.getItem(knowledgeHeadKey(agentIdOf(companion)))
     if (!knowHead) return
     let cancelled = false
     loadKnowledge(ownerKey, knowHead)

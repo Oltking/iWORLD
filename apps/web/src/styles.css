@@ -604,6 +604,17 @@ code {
 }
 .devlink:hover:not(:disabled) { transform: none; box-shadow: none; color: var(--muted); background: rgba(255,255,255,0.04); }
 
+/* ── My Agents roster ───────────────────────────────────────────────────── */
+.roster { display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 8px; scrollbar-width: none; }
+.roster::-webkit-scrollbar { display: none; }
+.roster-tile { flex: 0 0 auto; width: auto; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 12px; border-radius: 16px; border: 1px solid var(--line); background: rgba(255,255,255,0.02); box-shadow: none; position: relative; min-width: 76px; }
+.roster-tile:hover:not(:disabled) { transform: translateY(-2px); background: rgba(255,255,255,0.05); box-shadow: none; }
+.roster-tile.on { border-color: rgba(167,139,250,0.7); background: rgba(139,92,246,0.12); box-shadow: 0 6px 18px -10px rgba(139,92,246,0.7); }
+.roster-name { font-size: 12px; font-weight: 700; color: var(--ink); max-width: 72px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.roster-mint { position: absolute; top: 6px; right: 8px; font-size: 11px; }
+.roster-tile.new { color: var(--muted); border-style: dashed; justify-content: center; }
+.roster-plus { font-size: 26px; line-height: 40px; height: 40px; }
+
 /* ── Confetti ───────────────────────────────────────────────────────────── */
 .confetti-root { position: fixed; inset: 0; pointer-events: none; z-index: 100; overflow: hidden; }
 .confetti { position: absolute; top: -12px; width: 9px; height: 14px; border-radius: 2px; opacity: 0.95; animation: confettiFall linear forwards; }

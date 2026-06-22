@@ -11,11 +11,13 @@ import { OG_TESTNET } from './lib/og'
 import { CompanionCreator } from './screens/CompanionCreator'
 import {
   conversationHeadKey,
+  agentIdOf,
   loadSession,
   saveSession,
   clearSession,
   type ActiveCompanion,
 } from './lib/session'
+import { getRoster, upsertAgent, removeAgent, genAgentId, type RosterAgent } from './lib/roster'
 import { CompanionOrb } from './components/CompanionOrb'
 import { EmbeddedAuth } from './components/EmbeddedAuth'
 import { FundingButton } from './components/FundingButton'
@@ -53,20 +55,60 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
   const [view, setView] = useState<View>('create')
   const [restoredInitial, setRestoredInitial] = useState<{ messages: MemoryMessage[]; head: string | null } | null>(null)
   const [bootSession] = useState(loadSession)
+  const [roster, setRoster] = useState<RosterAgent[]>([])
+  const [draftAgentId, setDraftAgentId] = useState<string | null>(null)
+
+  const refreshRoster = useCallback((owner: string) => setRoster(getRoster(owner)), [])
 
   // Continuity across refreshes: once the same wallet reconnects, bring the companion back.
   useEffect(() => {
-    if (companion || !conn || !bootSession) return
-    if (bootSession.ownerAddr === conn.address.toLowerCase()) {
+    if (!conn) return
+    const owner = conn.address.toLowerCase()
+    refreshRoster(owner)
+    if (companion || !bootSession) return
+    if (bootSession.ownerAddr === owner) {
       setCompanion(bootSession)
+      upsertAgent(owner, bootSession) // make sure the booted agent shows in My Agents
+      refreshRoster(owner)
       setView('world')
     }
-  }, [conn, companion, bootSession])
+  }, [conn, companion, bootSession, refreshRoster])
 
   // Persist the active companion pointer (non-secret) so it survives a reload.
   useEffect(() => {
     if (companion) saveSession(companion)
   }, [companion])
+
+  // Register an agent in the roster whenever it's created/claimed/switched.
+  const adoptAgent = useCallback(
+    (c: ActiveCompanion, goWorld = true) => {
+      setCompanion(c)
+      upsertAgent(c.ownerAddr, c)
+      refreshRoster(c.ownerAddr)
+      setDraftAgentId(null)
+      if (goWorld) {
+        setRestoredInitial(null)
+        setView('world')
+      }
+    },
+    [refreshRoster],
+  )
+
+  const switchAgent = useCallback(
+    (a: RosterAgent) => {
+      setCompanion(a)
+      setRestoredInitial(null)
+      setView('world')
+    },
+    [],
+  )
+
+  const newAgent = useCallback(() => {
+    setDraftAgentId(genAgentId())
+    setCompanion(null)
+    setRestoredInitial(null)
+    setView('create')
+  }, [])
 
   const onRestore = useCallback(
     (exp: KiprExport) => {
@@ -76,26 +118,40 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
       // Same wallet → its on-chain head still decrypts; different wallet → load from the
       // file's plaintext and let them re-Save to re-own it under this key.
       const head = sameOwner ? exp.companion.conversationHead : null
-      setCompanion({
+      const restored: ActiveCompanion = {
         ownerAddr: owner,
         name: exp.companion.name,
         modelId: exp.personality.modelId,
         version: exp.companion.personalityVersion,
         personalityRootHash: exp.companion.personalityRootHash,
-      })
+      }
+      setCompanion(restored)
+      upsertAgent(owner, restored)
+      refreshRoster(owner)
       setRestoredInitial({ messages: exp.conversation, head })
-      if (head) localStorage.setItem(conversationHeadKey(owner), head)
+      if (head) localStorage.setItem(conversationHeadKey(agentIdOf(restored)), head)
       setView('chat')
     },
-    [conn],
+    [conn, refreshRoster],
   )
 
   const onDelete = useCallback(() => {
-    if (companion) localStorage.removeItem(conversationHeadKey(companion.ownerAddr))
-    clearSession()
-    setCompanion(null)
+    if (!companion) return
+    const owner = companion.ownerAddr
+    localStorage.removeItem(conversationHeadKey(agentIdOf(companion)))
+    removeAgent(owner, companion)
+    const rest = getRoster(owner)
+    setRoster(rest)
+    if (rest.length > 0) {
+      setCompanion(rest[0])
+      saveSession(rest[0])
+      setView('world')
+    } else {
+      clearSession()
+      setCompanion(null)
+      setView('create')
+    }
     setRestoredInitial(null)
-    setView('create')
   }, [companion])
 
   const [balance, setBalance] = useState<string | null>(null)
@@ -267,6 +323,9 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                 <World
                   ownerKey={ownerKey}
                   companion={companion}
+                  roster={roster}
+                  onSwitch={switchAgent}
+                  onNew={newAgent}
                   onTalk={() => setView('chat')}
                   onTrain={() => setView('train')}
                   onArena={() => setView('arena')}
@@ -287,15 +346,11 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                   companion={companion}
                   onRestore={onRestore}
                   onDelete={onDelete}
-                  onClaimed={(c) => {
-                    setCompanion(c)
-                    setRestoredInitial(null)
-                    setView('world')
-                  }}
+                  onClaimed={(c) => adoptAgent(c)}
                 />
               ) : companion && view === 'chat' && conn ? (
                 <Chat
-                  key={companion.ownerAddr}
+                  key={agentIdOf(companion)}
                   conn={conn}
                   ownerKey={ownerKey}
                   companion={companion}
@@ -310,15 +365,26 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                   onUnlock={onUnlock}
                   unlockStatus={unlockStatus}
                   companion={companion}
+                  agentId={companion ? agentIdOf(companion) : draftAgentId ?? conn?.address.toLowerCase() ?? ''}
                   onCompanionReady={(c) => {
-                    const firstTime = !companion
-                    setCompanion(c)
-                    if (firstTime) {
-                      setRestoredInitial(null)
-                      setView('world')
+                    if (!companion) {
+                      adoptAgent(c) // new agent → roster + World
+                    } else {
+                      // editing the active agent — keep it here, just refresh its roster entry
+                      setCompanion(c)
+                      upsertAgent(c.ownerAddr, c)
+                      refreshRoster(c.ownerAddr)
                     }
                   }}
-                  onMinted={(tokenId) => setCompanion((c) => (c ? { ...c, tokenId } : c))}
+                  onMinted={(tokenId) =>
+                    setCompanion((c) => {
+                      if (!c) return c
+                      const next = { ...c, tokenId }
+                      upsertAgent(next.ownerAddr, next)
+                      refreshRoster(next.ownerAddr)
+                      return next
+                    })
+                  }
                 />
               )}
             </Suspense>

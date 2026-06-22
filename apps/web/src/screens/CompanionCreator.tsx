@@ -104,6 +104,7 @@ export function CompanionCreator({
   onUnlock,
   unlockStatus,
   companion,
+  agentId,
   onCompanionReady,
   onMinted,
 }: {
@@ -112,12 +113,15 @@ export function CompanionCreator({
   onUnlock: () => void
   unlockStatus: Status
   companion: ActiveCompanion | null
+  /** The id this agent's memory/history is keyed by (owner for the first agent). */
+  agentId: string
   onCompanionReady: (c: {
     ownerAddr: string
     name: string
     modelId: string
     version: string
     personalityRootHash: string
+    agentId: string
   }) => void
   onMinted: (tokenId: string) => void
 }) {
@@ -175,7 +179,7 @@ export function CompanionCreator({
         setBaseline(c)
         setLoadedRoot(companion.personalityRootHash)
         // Seed history with the in-force version so the timeline always shows at least it.
-        addVersion(companion.ownerAddr, {
+        addVersion(agentId, {
           version: companion.version,
           rootHash: companion.personalityRootHash,
           name: c.name,
@@ -211,7 +215,6 @@ export function CompanionCreator({
 
   const changes = useMemo(() => diffFields(baseline, config), [baseline, config])
   const changed = editing && version !== companion!.version
-  const owner = conn?.address.toLowerCase() ?? ''
 
   // Persist the current config as a new version (create OR adopt-an-edit). Records the
   // version in history on success — every adoption is an explicit, opt-in act.
@@ -229,7 +232,7 @@ export function CompanionCreator({
       setConfirming(false)
       setBaseline(config)
       setLoadedRoot(ref.rootHash)
-      addVersion(conn.address.toLowerCase(), {
+      addVersion(agentId, {
         version: ref.version,
         rootHash: ref.rootHash,
         name: config.name,
@@ -243,6 +246,7 @@ export function CompanionCreator({
         modelId: config.modelId,
         version: ref.version,
         personalityRootHash: ref.rootHash,
+        agentId,
       })
       toast.success(`${config.name} is alive — saved to 0G, yours alone ✨`)
     } catch (e) {
@@ -467,7 +471,7 @@ export function CompanionCreator({
       )}
 
       {/* P3 — the version timeline */}
-      {editing && <VersionHistory versions={getVersions(owner)} current={companion!.version} />}
+      {editing && <VersionHistory versions={getVersions(agentId)} current={companion!.version} />}
 
       {/* Phase 2 — mint the agent token (real when the contract is deployed) */}
       <section className={`card ${mintStatus}`}>

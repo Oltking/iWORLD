@@ -16,9 +16,18 @@ export interface ActiveCompanion {
   personalityRootHash: string
   /** ERC-7857 token id once the agent is minted on-chain (Phase 2). */
   tokenId?: string
+  /**
+   * Stable per-agent id (multi-agent world). Memory/knowledge/history are keyed by this.
+   * Legacy/first agent has none → falls back to the wallet address, keeping old data
+   * intact; additional agents get a fresh id.
+   */
+  agentId?: string
 }
 
-export const conversationHeadKey = (ownerAddr: string) => `kipr.conv.head.${ownerAddr}`
+/** The key under which an agent's memory lives — its agentId, or the wallet for legacy. */
+export const agentIdOf = (c: ActiveCompanion): string => c.agentId ?? c.ownerAddr
+
+export const conversationHeadKey = (agentId: string) => `kipr.conv.head.${agentId}`
 
 const SESSION_KEY = 'kipr.session.companion'
 

@@ -7,6 +7,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Connection } from '../lib/wallet'
 import type { ActiveCompanion } from '../lib/session'
+import { agentIdOf } from '../lib/session'
 import {
   appendKnowledge,
   loadKnowledge,
@@ -43,7 +44,7 @@ export function Train({
 }) {
   const [items, setItems] = useState<KnowledgeItem[]>([])
   const [head, setHead] = useState<string | null>(() =>
-    localStorage.getItem(knowledgeHeadKey(companion.ownerAddr)),
+    localStorage.getItem(knowledgeHeadKey(agentIdOf(companion))),
   )
   const [text, setText] = useState('')
   const [status, setStatus] = useState<Status>('idle')
@@ -74,7 +75,7 @@ export function Train({
         items: newItems,
       })
       setHead(ref.head)
-      localStorage.setItem(knowledgeHeadKey(companion.ownerAddr), ref.head)
+      localStorage.setItem(knowledgeHeadKey(agentIdOf(companion)), ref.head)
       setItems((prev) => [...prev, ...newItems])
       setStatus('ok')
       setAck(pick(newItems[0].kind === 'fact' ? FACT_ACKS : FB_ACKS))
@@ -112,7 +113,7 @@ export function Train({
     setForgetIdx(null)
     try {
       if (remaining.length === 0) {
-        localStorage.removeItem(knowledgeHeadKey(companion.ownerAddr))
+        localStorage.removeItem(knowledgeHeadKey(agentIdOf(companion)))
         setHead(null)
         setItems([])
       } else {
@@ -122,7 +123,7 @@ export function Train({
           items: remaining,
         })
         setHead(ref.head)
-        localStorage.setItem(knowledgeHeadKey(companion.ownerAddr), ref.head)
+        localStorage.setItem(knowledgeHeadKey(agentIdOf(companion)), ref.head)
         setItems(remaining)
       }
       setStatus('ok')

@@ -7,12 +7,13 @@
  */
 import { useEffect, useMemo, useState } from 'react'
 import type { ActiveCompanion } from '../lib/session'
-import { conversationHeadKey } from '../lib/session'
+import { conversationHeadKey, agentIdOf } from '../lib/session'
 import { loadPersonality } from '../lib/companion-store'
 import { loadKnowledge, knowledgeHeadKey } from '../lib/knowledge-store'
 import { getVersions } from '../lib/personality-history'
 import { getXP, levelFromXP } from '../lib/progress'
 import { ownedItems } from '../lib/items'
+import type { RosterAgent } from '../lib/roster'
 import { CompanionOrb } from '../components/CompanionOrb'
 import type { PersonalityConfig } from '@kipr/core/personality'
 
@@ -31,6 +32,9 @@ const PHASES = [
 export function World({
   ownerKey,
   companion,
+  roster,
+  onSwitch,
+  onNew,
   onTalk,
   onTrain,
   onArena,
@@ -40,6 +44,9 @@ export function World({
 }: {
   ownerKey: CryptoKey | null
   companion: ActiveCompanion
+  roster: RosterAgent[]
+  onSwitch: (a: RosterAgent) => void
+  onNew: () => void
   onTalk: () => void
   onTrain: () => void
   onArena: () => void
@@ -47,6 +54,7 @@ export function World({
   onShape: () => void
   onVault: () => void
 }) {
+  const activeId = agentIdOf(companion)
   const level = levelFromXP(getXP(companion.ownerAddr))
   const gear = ownedItems(companion.ownerAddr)
   const [persona, setPersona] = useState<PersonalityConfig | null>(null)
@@ -58,7 +66,7 @@ export function World({
     loadPersonality(ownerKey, companion.personalityRootHash)
       .then(({ config }) => !cancelled && setPersona(config))
       .catch(() => {})
-    const knowHead = localStorage.getItem(knowledgeHeadKey(companion.ownerAddr))
+    const knowHead = localStorage.getItem(knowledgeHeadKey(agentIdOf(companion)))
     if (knowHead) {
       loadKnowledge(ownerKey, knowHead)
         .then((items) => !cancelled && setLearned(items.length))
@@ -71,18 +79,48 @@ export function World({
     }
   }, [ownerKey, companion.personalityRootHash, companion.ownerAddr])
 
-  const versions = useMemo(() => getVersions(companion.ownerAddr), [companion.ownerAddr])
+  const versions = useMemo(() => getVersions(agentIdOf(companion)), [companion.ownerAddr])
   const born = versions[0]?.createdAt
   const age = daysSince(born)
-  const hasMemory = !!localStorage.getItem(conversationHeadKey(companion.ownerAddr))
+  const hasMemory = !!localStorage.getItem(conversationHeadKey(agentIdOf(companion)))
 
   return (
     <div className="world">
       <section className="world-hero">
         <p className="world-kicker">My Agents · iWORLD</p>
         <h2 className="world-title">Your living world of agents</h2>
-        <p className="intro-p">One agent, truly yours — created, owned on 0G, and growing as you go.</p>
+        <p className="intro-p">
+          {roster.length > 1
+            ? `${roster.length} agents, all truly yours — switch between them anytime.`
+            : 'Your agent, truly yours — created, owned on 0G, and growing as you go.'}
+        </p>
       </section>
+
+      {/* My Agents — switch between the agents you own */}
+      <div className="roster" role="tablist" aria-label="My agents">
+        {roster.map((a) => {
+          const id = a.agentId ?? a.ownerAddr
+          const on = id === activeId
+          return (
+            <button
+              key={id}
+              role="tab"
+              aria-selected={on}
+              className={`roster-tile ${on ? 'on' : ''}`}
+              onClick={() => !on && onSwitch(a)}
+              title={a.name}
+            >
+              <CompanionOrb size={40} state="idle" seed={a.version} />
+              <span className="roster-name">{a.name}</span>
+              {a.tokenId && <span className="roster-mint">🪙</span>}
+            </button>
+          )
+        })}
+        <button className="roster-tile new" onClick={onNew} title="Create another agent">
+          <span className="roster-plus">＋</span>
+          <span className="roster-name">New</span>
+        </button>
+      </div>
 
       {/* The agent */}
       <section className="agent-card">

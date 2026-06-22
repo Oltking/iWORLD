@@ -16,7 +16,8 @@ import { deriveTransferKey, transferPubKey, sealToRecipient, openSealed } from '
 import { loadPersonality, persistPersonality } from './companion-store'
 import { loadKnowledge, appendKnowledge, knowledgeHeadKey } from './knowledge-store'
 import { loadConversation, appendMessages } from './conversation-store'
-import { conversationHeadKey, type ActiveCompanion } from './session'
+import { conversationHeadKey, agentIdOf, type ActiveCompanion } from './session'
+import { genAgentId } from './roster'
 import { uploadBytes, downloadBytes } from './storage'
 import { personalityIntelligentData } from '@kipr/core/companion'
 import type { PersonalityConfig } from '@kipr/core/personality'
@@ -79,12 +80,12 @@ export async function transferAgent(
     throw new Error('Recipient hasn’t registered to receive agents yet.')
   }
 
-  // Gather the whole trained brain.
-  const owner = companion.ownerAddr
+  // Gather the whole trained brain (keyed by this agent, not just the wallet).
+  const aid = agentIdOf(companion)
   const { config } = await loadPersonality(ownerKey, companion.personalityRootHash)
-  const knowHead = localStorage.getItem(knowledgeHeadKey(owner))
+  const knowHead = localStorage.getItem(knowledgeHeadKey(aid))
   const knowledge = knowHead ? await loadKnowledge(ownerKey, knowHead) : []
-  const convHead = localStorage.getItem(conversationHeadKey(owner))
+  const convHead = localStorage.getItem(conversationHeadKey(aid))
   const conversation = convHead ? await loadConversation(ownerKey, convHead) : []
 
   const bundle: BrainBundle = { v: 1, name: companion.name, modelId: companion.modelId, personality: config, knowledge, conversation }
@@ -114,15 +115,19 @@ export async function claimAgent(
   const sealed = await downloadBytes(sealedRoot)
   const bundle = JSON.parse(new TextDecoder().decode(await openSealed(transferKey, sealed))) as BrainBundle
 
+  // A claimed agent is a NEW agent in your roster — give it its own id so its memory
+  // is separate from your other agents.
+  const newAgentId = genAgentId()
+
   // Re-encrypt the brain under MY key (so my normal flow works), and re-point the token.
   const { rootHash: persRoot, version } = await persistPersonality(signer, ownerKey, bundle.personality)
   if (bundle.knowledge?.length) {
     const r = await appendKnowledge(signer, ownerKey, { companion: me, head: null, items: bundle.knowledge })
-    localStorage.setItem(knowledgeHeadKey(me), r.head)
+    localStorage.setItem(knowledgeHeadKey(newAgentId), r.head)
   }
   if (bundle.conversation?.length) {
     const r = await appendMessages(signer, ownerKey, { companion: me, head: null, messages: bundle.conversation })
-    localStorage.setItem(conversationHeadKey(me), r.head)
+    localStorage.setItem(conversationHeadKey(newAgentId), r.head)
   }
 
   const nft = new Contract(NFT, NFT_ABI, signer)
@@ -137,5 +142,6 @@ export async function claimAgent(
     version,
     personalityRootHash: persRoot,
     tokenId,
+    agentId: newAgentId,
   }
 }
