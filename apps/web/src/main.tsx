@@ -19,7 +19,7 @@ createRoot(root).render(
         <App privyEnabled />
       </PrivyProvider>
     ) : (
-      <App privyEnabled={false} />
+      <App privyEnabled={true} />
     )}
   </StrictMode>,
 )
