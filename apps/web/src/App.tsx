@@ -37,10 +37,11 @@ const Arena = lazy(() => import('./screens/Arena').then((m) => ({ default: m.Are
 const Market = lazy(() => import('./screens/Market').then((m) => ({ default: m.Market })))
 const Breed = lazy(() => import('./screens/Breed').then((m) => ({ default: m.Breed })))
 const Debate = lazy(() => import('./screens/Debate').then((m) => ({ default: m.Debate })))
+const Square = lazy(() => import('./screens/Square').then((m) => ({ default: m.Square })))
 const Vault = lazy(() => import('./screens/Vault').then((m) => ({ default: m.Vault })))
 const Harness = lazy(() => import('./screens/Harness').then((m) => ({ default: m.Harness })))
 
-type View = 'world' | 'create' | 'chat' | 'train' | 'arena' | 'market' | 'breed' | 'debate' | 'vault'
+type View = 'world' | 'create' | 'chat' | 'train' | 'arena' | 'market' | 'breed' | 'debate' | 'square' | 'vault'
 
 // Sponsored funding is optional — only offered when a funder service is configured.
 const funderConfigured = !!(import.meta.env.VITE_FUNDER_URL as string | undefined)
@@ -375,6 +376,7 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                   onDebate={() => setView('debate')}
                   onMarket={() => setView('market')}
                   onBreed={() => setView('breed')}
+                  onSquare={() => setView('square')}
                   onShape={() => setView('create')}
                   onVault={() => setView('vault')}
                 />
@@ -384,6 +386,8 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                 <Arena conn={conn} ownerKey={ownerKey} companion={companion} />
               ) : view === 'market' && conn ? (
                 <Market conn={conn} companion={companion} />
+              ) : view === 'square' && conn ? (
+                <Square conn={conn} />
               ) : companion && view === 'breed' && conn ? (
                 <Breed conn={conn} ownerKey={ownerKey} companion={companion} roster={roster} onBorn={(c) => adoptAgent(c)} />
               ) : companion && view === 'debate' && conn ? (

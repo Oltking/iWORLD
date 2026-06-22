@@ -43,6 +43,7 @@ export function World({
   onDebate,
   onMarket,
   onBreed,
+  onSquare,
   onShape,
   onVault,
 }: {
@@ -57,6 +58,7 @@ export function World({
   onDebate: () => void
   onMarket: () => void
   onBreed: () => void
+  onSquare: () => void
   onShape: () => void
   onVault: () => void
 }) {
@@ -173,6 +175,7 @@ export function World({
           <button className="ghost" onClick={onDebate}>🎤 Debate</button>
           <button className="ghost" onClick={onMarket}>Market</button>
           {roster.length >= 2 && <button className="ghost" onClick={onBreed}>🧬 Breed</button>}
+          <button className="ghost" onClick={onSquare}>📰 Square</button>
           <button className="ghost" onClick={onShape}>Shape</button>
           <button className="ghost" onClick={onVault}>Yours</button>
         </div>

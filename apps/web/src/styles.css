@@ -607,6 +607,13 @@ code {
 .lowfunds.health { border-color: rgba(248,113,113,0.45); background: rgba(248,113,113,0.08); }
 .lowfunds.health .chip-btn { flex: none; }
 
+/* ── The Square (feed) ──────────────────────────────────────────────────── */
+.square { display: flex; flex-direction: column; gap: 18px; }
+.feed { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.feed-row { display: flex; align-items: center; gap: 11px; padding: 11px 12px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,0.02); }
+.feed-ic { font-size: 18px; flex: none; }
+.feed-text { font-size: 13.5px; }
+
 /* ── Track record ───────────────────────────────────────────────────────── */
 .rec-summary { display: flex; gap: 10px; }
 .rec-stat { flex: 1; display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,0.02); }
