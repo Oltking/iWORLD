@@ -110,9 +110,11 @@ body {
   }
   .hd-row { flex-direction: column; align-items: stretch; gap: 16px; }
   .chip, .chip-btn { width: 100%; justify-content: center; }
-  /* Smaller, tidier wallet chip in the sidebar — fits the address + balance on one line. */
-  .hd .chip { font-size: 11px; padding: 8px 10px; gap: 6px; }
-  .hd .chip .copy-btn { padding: 1px 3px; }
+  /* Sidebar wallet chip: address (+copy) on top, balance on its own line below — clean,
+     no awkward mid-address wrapping. */
+  .hd .chip { font-size: 11.5px; padding: 9px 12px; gap: 6px; flex-wrap: wrap; justify-content: center; }
+  .hd .chip .copy-btn { padding: 1px 2px; flex: none; }
+  .hd .chip .chip-dim { flex-basis: 100%; text-align: center; margin-top: 2px; white-space: nowrap; color: var(--faint); }
   .hd .brand.sm { font-size: 20px; }
   .hd .sub { font-size: 11px; }
   .tabs {

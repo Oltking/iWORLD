@@ -382,7 +382,7 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                   <span className="chip" title={`${conn.address}\n${balance ?? '?'} 0G`}>
                     <span className="statusdot ok" /> {short}
                     <CopyButton text={conn.address} label="Copy address" />
-                    <span className="chip-dim">· {balance ?? '…'} 0G · 🔓</span>
+                    <span className="chip-dim">{balance ?? '…'} 0G · 🔓</span>
                   </span>
                 ) : (
                   <button className="chip-btn" onClick={onUnlock} disabled={unlockStatus === 'busy'} title="Sign once to derive your encryption key">
