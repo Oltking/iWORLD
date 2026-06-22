@@ -44,7 +44,9 @@ export function getRelayConfig(): RelayConfig {
     port: Number(optional('RELAY_PORT', '8788')),
     evmRpc: optional('ZG_EVM_RPC', 'https://evmrpc-testnet.0g.ai'),
     chainId: Number(optional('ZG_CHAIN_ID', '16602')),
-    houseKey: required('HOUSE_PRIVATE_KEY'),
+    // Use a dedicated HOUSE_PRIVATE_KEY if set; otherwise reuse the wallet already in
+    // .env (ZG_PRIVATE_KEY) — handy when its compute ledger is already funded.
+    houseKey: (process.env.HOUSE_PRIVATE_KEY?.trim() || required('ZG_PRIVATE_KEY')),
     providerAddr: process.env.ZG_COMPUTE_PROVIDER_ADDR?.trim() || undefined,
     dailyQuota: Number(optional('RELAY_DAILY_QUOTA', '50')),
     webOrigin: optional('RELAY_WEB_ORIGIN', 'http://localhost:5173'),

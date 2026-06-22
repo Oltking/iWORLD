@@ -43,9 +43,15 @@ async function main() {
 
   const broker: Broker = await createZGComputeNetworkBroker(house)
   const service = await pickTeeMLProvider(broker, cfg.providerAddr)
-  console.log(`  provider ${service.provider} · model ${service.model}`)
-  console.log('  ensuring shared ledger funding (spends house 0G the first time)…')
-  await ensureInferenceFunding(broker, service.provider)
+  console.log(`  provider ${service.provider} · model ${service.model} · ack ${service.teeSignerAcknowledged}`)
+  // If the provider is already acknowledged, the shared ledger is set up — don't
+  // re-fund (that would drain it on every restart). Otherwise open/fund it once.
+  if (!service.teeSignerAcknowledged) {
+    console.log('  setting up the shared ledger (spends house 0G, one-time)…')
+    await ensureInferenceFunding(broker, service.provider)
+  } else {
+    console.log('  shared ledger already funded — reusing it.')
+  }
   const { endpoint, model } = await broker.inference.getServiceMetadata(service.provider)
   console.log(`  shared ledger ready · endpoint ${endpoint}`)
 
