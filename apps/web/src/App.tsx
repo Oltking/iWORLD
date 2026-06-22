@@ -23,6 +23,7 @@ import { EmbeddedAuth } from './components/EmbeddedAuth'
 import { FundingButton } from './components/FundingButton'
 import { Toaster } from './components/Toaster'
 import { CopyButton } from './components/CopyButton'
+import { SignOut } from './components/SignOut'
 import { Welcome } from './screens/Welcome'
 import { toast, humanizeError } from './lib/toast'
 import { diagnoseConnection, fixNetwork, type Health } from './lib/health'
@@ -111,6 +112,23 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
     setDraftAgentId(genAgentId())
     setCompanion(null)
     setRestoredInitial(null)
+    setView('create')
+  }, [])
+
+  // Sign out — drop the connection + derived key + active agent, back to the hero. The
+  // agent's data stays safe on 0G (recoverable by signing in again with the same wallet).
+  const signOut = useCallback(() => {
+    clearSession()
+    setConn(null)
+    setOwnerKey(null)
+    setCompanion(null)
+    setRoster([])
+    setBalance(null)
+    setHealth(null)
+    setWalletKind(null)
+    setWalletStatus('idle')
+    setRestoredInitial(null)
+    setDraftAgentId(null)
     setView('create')
   }, [])
 
@@ -339,6 +357,7 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                   )}
                 </nav>
               )}
+              {conn && <SignOut privyEnabled={privyEnabled} onSignOut={signOut} />}
             </header>
 
             <div className="content">

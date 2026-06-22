@@ -119,6 +119,23 @@ body {
   .listings, .feed { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-content: start; }
 }
 
+/* ── Sign out ───────────────────────────────────────────────────────────── */
+.signout {
+  width: auto; background: none; box-shadow: none; color: var(--faint);
+  font-size: 12.5px; font-weight: 600; padding: 7px 12px; border-radius: 8px; margin-top: 8px;
+}
+.signout:hover:not(:disabled) { color: var(--coral); background: rgba(248, 113, 133, 0.08); transform: none; box-shadow: none; }
+
+/* ── Desktop reading widths (keep text + chat comfortable, not sprawled) ─── */
+.hero { max-width: 620px; margin-inline: auto; }
+@media (min-width: 900px) {
+  .shell { grid-template-columns: 240px minmax(0, 820px); gap: 36px; justify-content: center; }
+  .hd .signout { width: 100%; text-align: center; margin-top: 14px; }
+  .chat { max-width: 720px; margin-inline: auto; width: 100%; }
+  .welcome { max-width: 560px; margin-inline: auto; }
+  .intro-p, .lede { max-width: 640px; margin-inline: auto; }
+}
+
 .hd { margin-bottom: 2px; }
 .hd-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .hd-brand { display: flex; align-items: center; gap: 11px; }
