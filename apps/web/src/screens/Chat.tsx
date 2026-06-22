@@ -379,11 +379,24 @@ export function Chat({
       </div>
 
       <div className="composer">
-        <input
-          className="inp"
+        <textarea
+          className="inp composer-ta"
+          rows={1}
           value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && send()}
+          onChange={(e) => {
+            setInput(e.target.value)
+            const el = e.target
+            el.style.height = 'auto'
+            el.style.height = Math.min(el.scrollHeight, 160) + 'px'
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault()
+              const el = e.currentTarget
+              send()
+              el.style.height = 'auto'
+            }
+          }}
           placeholder={`Message ${companion.name}…`}
           disabled={thinking}
         />

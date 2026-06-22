@@ -225,10 +225,14 @@ body {
     0 18px 50px -28px rgba(0, 0, 0, 0.85);
   transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.25s, box-shadow 0.25s;
 }
-.card:hover {
-  transform: translateY(-3px);
-  border-color: var(--line-2);
-  box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 26px 60px -28px rgba(0,0,0,0.9);
+/* Only lift on real hover devices (no stuck states on touch), and gently — a dense
+   dashboard of cards shouldn't jump as the mouse crosses it. */
+@media (hover: hover) {
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: var(--line-2);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset, 0 24px 56px -30px rgba(0, 0, 0, 0.9);
+  }
 }
 /* gradient hairline along the top edge */
 .card::before {
@@ -581,8 +585,9 @@ code {
 .typing span:nth-child(3) { animation-delay: 0.4s; }
 @keyframes typing { 0%, 60%, 100% { opacity: 0.3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-3px); } }
 
-.composer { display: flex; gap: 10px; align-items: center; position: sticky; bottom: 12px; z-index: 2; }
+.composer { display: flex; gap: 10px; align-items: flex-end; position: sticky; bottom: 12px; z-index: 2; }
 .composer .inp { margin: 0; flex: 1; border-radius: 999px; padding: 14px 18px; background: rgba(10, 7, 18, 0.85); backdrop-filter: blur(12px); }
+.composer .composer-ta { border-radius: 22px; resize: none; line-height: 1.45; min-height: 48px; max-height: 160px; overflow-y: auto; }
 .send { width: 48px; height: 48px; flex: none; border-radius: 50%; padding: 0; font-size: 20px; font-weight: 800; display: grid; place-items: center; }
 
 .memrow { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
