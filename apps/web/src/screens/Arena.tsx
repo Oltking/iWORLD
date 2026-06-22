@@ -142,7 +142,7 @@ export function Arena({
       setSavedRoot(rootHash)
       setSaveStatus('ok')
     } catch (e) {
-      setSaveErr((e as Error).message)
+      setSaveErr(humanizeError(e))
       setSaveStatus('error')
     }
   }

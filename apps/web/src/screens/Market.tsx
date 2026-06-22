@@ -41,7 +41,7 @@ export function Market({ conn, companion }: { conn: Connection; companion: Activ
         setCards(Object.fromEntries(entries.filter(([, c]) => c)) as Record<string, AgentCard>)
       }
     } catch (e) {
-      setErr((e as Error).message)
+      setErr(humanizeError(e))
       setListings([])
     }
   }, [conn.provider])

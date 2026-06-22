@@ -343,7 +343,7 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                 <nav className="tabs">
                   {companion ? (
                     <>
-                      <button className={view === 'world' ? 'tab on' : 'tab'} onClick={() => setView('world')}>World</button>
+                      <button className={['world', 'breed', 'debate', 'square'].includes(view) ? 'tab on' : 'tab'} onClick={() => setView('world')}>World</button>
                       <button className={view === 'chat' ? 'tab on' : 'tab'} onClick={() => setView('chat')}>Chat</button>
                       <button className={view === 'train' ? 'tab on' : 'tab'} onClick={() => setView('train')}>Train</button>
                       <button className={view === 'arena' ? 'tab on' : 'tab'} onClick={() => setView('arena')}>Arena</button>

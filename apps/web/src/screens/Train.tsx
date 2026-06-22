@@ -15,6 +15,7 @@ import {
   type KnowledgeItem,
   type KnowledgeKind,
 } from '../lib/knowledge-store'
+import { humanizeError } from '../lib/toast'
 import { CompanionOrb } from '../components/CompanionOrb'
 import type { Status } from '../components/Dot'
 
@@ -80,7 +81,7 @@ export function Train({
       setStatus('ok')
       setAck(pick(newItems[0].kind === 'fact' ? FACT_ACKS : FB_ACKS))
     } catch (e) {
-      setErr((e as Error).message)
+      setErr(humanizeError(e))
       setStatus('error')
     }
   }
@@ -128,7 +129,7 @@ export function Train({
       }
       setStatus('ok')
     } catch (e) {
-      setErr((e as Error).message)
+      setErr(humanizeError(e))
       setStatus('error')
     }
   }

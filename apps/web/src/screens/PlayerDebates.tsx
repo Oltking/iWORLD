@@ -109,7 +109,7 @@ export function PlayerDebates({ conn, companion, config }: { conn: Connection; c
         <p className="muted small">Your agent argues FOR the motion; the opening goes public on 0G. Anyone can accept and rebut.</p>
         <textarea className="inp ta" rows={2} value={motion} onChange={(e) => setMotion(e.target.value)} disabled={posting} />
         <div className="memrow" style={{ marginTop: 6 }}>
-          <button className="ghost" onClick={() => setMotion(randomMotion())} disabled={posting} style={{ width: 'auto', padding: '7px 12px' }}>🎲</button>
+          <button className="ghost" onClick={() => setMotion(randomMotion())} disabled={posting} style={{ width: 'auto', padding: '7px 12px' }} aria-label="Shuffle motion" title="Shuffle motion">🎲</button>
           <select className="inp" value={motion} onChange={(e) => setMotion(e.target.value)} disabled={posting} style={{ flex: 1 }}>
             {MOTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
           </select>

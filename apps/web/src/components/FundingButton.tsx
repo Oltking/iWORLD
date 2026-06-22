@@ -6,6 +6,7 @@
 import { useState } from 'react'
 import { usePrivy } from '@privy-io/react-auth'
 import { requestFunding } from '../lib/funder'
+import { humanizeError } from '../lib/toast'
 
 export function FundingButton({ address, onFunded }: { address: string; onFunded: () => void }) {
   const { getAccessToken } = usePrivy()
@@ -22,7 +23,7 @@ export function FundingButton({ address, onFunded }: { address: string; onFunded
       setStatus('done')
       setTimeout(onFunded, 1500) // let the drip settle, then refresh balance
     } catch (e) {
-      setErr((e as Error).message)
+      setErr(humanizeError(e))
       setStatus('error')
     }
   }

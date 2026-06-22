@@ -29,6 +29,7 @@ import {
   type InferenceService,
 } from '../lib/compute'
 import { relayConfigured, relayChat } from '../lib/compute-relay'
+import { humanizeError } from '../lib/toast'
 import { loadPersonality } from '../lib/companion-store'
 import { loadKnowledge, knowledgeHeadKey, knowledgePromptBlock } from '../lib/knowledge-store'
 import { conversationHeadKey, agentIdOf, type ActiveCompanion } from '../lib/session'
@@ -209,7 +210,7 @@ export function Chat({
       setCompute('active')
       setActivateStatus('ok')
     } catch (e) {
-      setActivateErr((e as Error).message)
+      setActivateErr(humanizeError(e))
       setActivateStatus('error')
     }
   }
@@ -301,7 +302,7 @@ export function Chat({
       setSavedCount(messages.length)
       setSaveStatus('ok')
     } catch (e) {
-      setSaveErr((e as Error).message)
+      setSaveErr(humanizeError(e))
       setSaveStatus('error')
     }
   }
@@ -316,7 +317,7 @@ export function Chat({
       setSavedCount(restored.length)
       setSaveStatus('ok')
     } catch (e) {
-      setSaveErr((e as Error).message)
+      setSaveErr(humanizeError(e))
       setSaveStatus('error')
     }
   }
@@ -386,7 +387,7 @@ export function Chat({
           placeholder={`Message ${companion.name}…`}
           disabled={thinking}
         />
-        <button className="send" onClick={send} disabled={!input.trim() || thinking}>↑</button>
+        <button className="send" onClick={send} disabled={!input.trim() || thinking} aria-label="Send message">↑</button>
       </div>
 
       <div className="memrow">

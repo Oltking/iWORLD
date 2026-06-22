@@ -63,7 +63,7 @@ export function Vault({
       setRegStatus('ok')
       toast.success('Registered — people can now hand you agents 🤝')
     } catch (e) {
-      setTransferErr((e as Error).message)
+      setTransferErr(humanizeError(e))
       setRegStatus('error')
       toast.error(humanizeError(e))
     }
@@ -82,7 +82,7 @@ export function Vault({
       toast.success(`${companion.name} sent — brain and all 🤝`)
       setTimeout(onDelete, 2500) // you gave it away; clear local state
     } catch (e) {
-      setTransferErr((e as Error).message)
+      setTransferErr(humanizeError(e))
       setSendStatus('error')
       toast.error(humanizeError(e))
     }
@@ -101,7 +101,7 @@ export function Vault({
       toast.success(`Claimed ${c.name} — brain and all 🎉`)
       onClaimed(c)
     } catch (e) {
-      setTransferErr((e as Error).message)
+      setTransferErr(humanizeError(e))
       setClaimStatus('error')
       toast.error(humanizeError(e))
     }
@@ -122,7 +122,7 @@ export function Vault({
       downloadJson(bundle, `iworld-${companion.name.toLowerCase()}-${date}.json`)
       setExportStatus('ok')
     } catch (e) {
-      setExportErr((e as Error).message)
+      setExportErr(humanizeError(e))
       setExportStatus('error')
     }
   }
@@ -137,7 +137,7 @@ export function Vault({
       onRestore(exp)
       setImportOk(`Restored ${exp.companion.name} — ${exp.conversation.length} messages, integrity verified.`)
     } catch (err) {
-      setImportErr((err as Error).message)
+      setImportErr(humanizeError(err))
     } finally {
       if (fileRef.current) fileRef.current.value = ''
     }

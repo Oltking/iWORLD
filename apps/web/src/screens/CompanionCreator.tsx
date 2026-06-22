@@ -252,7 +252,7 @@ export function CompanionCreator({
       })
       toast.success(`${config.name} is alive — saved to 0G, yours alone ✨`)
     } catch (e) {
-      setSaveErr((e as Error).message)
+      setSaveErr(humanizeError(e))
       setSaveStatus('error')
       toast.error(humanizeError(e))
     }
@@ -278,7 +278,7 @@ export function CompanionCreator({
       celebrate()
       toast.success(`Minted! ${config.name} is Agent #${res.tokenId ?? '—'}, yours on-chain 🪙`)
     } catch (e) {
-      setMintErr((e as Error).message)
+      setMintErr(humanizeError(e))
       setMintStatus('error')
       toast.error(humanizeError(e))
     }
@@ -295,7 +295,7 @@ export function CompanionCreator({
       setRecovered({ name: c.name, version: v })
       setRecoverStatus('ok')
     } catch (e) {
-      setRecoverErr((e as Error).message)
+      setRecoverErr(humanizeError(e))
       setRecoverStatus('error')
     }
   }
