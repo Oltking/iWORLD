@@ -26,7 +26,9 @@ export const privyConfig = {
   defaultChain: ogGalileo,
   supportedChains: [ogGalileo],
   loginMethods: ['email', 'passkey'],
-  embeddedWallets: { ethereum: { createOnLogin: 'users-without-wallets' } },
+  // 'all-users' (not 'users-without-wallets'): always mint an embedded wallet on login,
+  // so an email/passkey user uses THAT — never falling back to MetaMask.
+  embeddedWallets: { ethereum: { createOnLogin: 'all-users' } },
   appearance: { theme: 'dark', accentColor: '#8b5cf6', walletChainType: 'ethereum-only' },
 } as const
 

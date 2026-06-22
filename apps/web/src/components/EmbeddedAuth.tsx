@@ -21,10 +21,13 @@ export function EmbeddedAuth({
 
   useEffect(() => {
     if (!ready || !authenticated || connected) return
-    const embedded =
-      (wallets.find((w) => w.walletClientType === 'privy') as PrivyWalletLike | undefined) ??
-      (wallets[0] as PrivyWalletLike | undefined)
-    if (!embedded) return // wallet still being created after login — effect re-runs when it lands
+    // Strictly the Privy EMBEDDED wallet — never silently bridge an injected wallet
+    // (e.g. MetaMask) on the email/passkey path. If it isn't ready yet, wait: the
+    // effect re-runs when `wallets` updates and the embedded wallet appears.
+    const embedded = wallets.find(
+      (w) => w.walletClientType === 'privy' || (w as { connectorType?: string }).connectorType === 'embedded',
+    ) as PrivyWalletLike | undefined
+    if (!embedded) return
     let cancelled = false
     connectionFromPrivyWallet(embedded)
       .then((c) => {
