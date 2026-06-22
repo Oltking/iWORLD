@@ -276,38 +276,91 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
       <main className="wrap">
         {/* ── HERO (pre-connect) ───────────────────────────────────────────── */}
         {!conn && !showDev ? (
-          <section className="hero">
-            <CompanionOrb size={150} state="idle" />
-            <h1 className="brand">iWORLD</h1>
-            <p className="tagline">Agents you create, own, and grow.</p>
-            <p className="lede">
-              A living world of AI agents that are truly yours. Private by design — your agent thinks
-              in a sealed enclave, and its memory &amp; personality live in storage <em>you</em> own.
-              No company can read it, change it, or take it away.
-            </p>
-            <div className="cta-group">
-              {privyEnabled && (
-                <EmbeddedAuth connected={!!conn} onConnection={(c) => applyConnection(c, 'embedded')} />
-              )}
-              {hasInjectedWallet() ? (
-                <button
-                  className={privyEnabled ? 'cta-secondary' : 'cta'}
-                  onClick={onConnect}
-                  disabled={walletStatus === 'busy'}
-                >
-                  {walletStatus === 'busy' ? 'Connecting…' : privyEnabled ? 'or connect a wallet' : 'Begin'}
-                </button>
-              ) : (
-                !privyEnabled && <p className="muted small">iWORLD needs an EVM wallet like MetaMask.</p>
-              )}
-            </div>
-            {walletErr && <p className="err">{walletErr}</p>}
-            <div className="trust">
-              <span>🔒 TEE-private</span>
-              <span>🔑 You hold the keys</span>
-              <span>♾️ Yours to keep</span>
-            </div>
-          </section>
+          <div className="landing">
+            {/* ── HERO ───────────────────────────────────────────────────────── */}
+            <section className="hero">
+              <CompanionOrb size={158} state="idle" />
+              <h1 className="brand hero-brand">iWORLD</h1>
+              <p className="hero-headline">
+                A living world of AI agents that are truly <span className="grad-word">yours</span>.
+              </p>
+              <p className="lede">
+                Create a companion with its own character. It thinks inside a sealed enclave — no one can
+                read it — and its mind lives in storage <em>you</em> control. Own it on-chain, train it,
+                and grow it: chat, debate, duel, breed.
+              </p>
+              <div className="cta-group">
+                {privyEnabled && (
+                  <EmbeddedAuth connected={!!conn} onConnection={(c) => applyConnection(c, 'embedded')} />
+                )}
+                {hasInjectedWallet() ? (
+                  <button
+                    className={privyEnabled ? 'cta-secondary' : 'cta'}
+                    onClick={onConnect}
+                    disabled={walletStatus === 'busy'}
+                  >
+                    {walletStatus === 'busy' ? 'Connecting…' : privyEnabled ? 'or connect a wallet' : 'Begin'}
+                  </button>
+                ) : (
+                  !privyEnabled && <p className="muted small">iWORLD needs an EVM wallet like MetaMask.</p>
+                )}
+              </div>
+              {walletErr && <p className="err">{walletErr}</p>}
+              <p className="hero-note">Free to start · nothing to install · your keys, your agent</p>
+              <div className="trust">
+                <span>🔒 TEE-private</span>
+                <span>🔑 You hold the keys</span>
+                <span>♾️ Yours to keep</span>
+              </div>
+            </section>
+
+            {/* ── WHAT YOU CAN DO ────────────────────────────────────────────── */}
+            <section className="landing-section">
+              <p className="world-kicker">The world</p>
+              <h2 className="landing-h">One agent. A whole world.</h2>
+              <div className="lfeatures">
+                {(
+                  [
+                    ['🎨', 'Create', 'Spin up a companion with its own voice and values — in two taps.'],
+                    ['🔒', 'Private', 'It thinks in a TEE. Your conversations are never harvested — not even by us.'],
+                    ['🪙', 'Own it', 'Mint it as an iNFT — its memory and personality are yours on 0G, forever.'],
+                    ['🎓', 'Train it', 'Teach it what matters; it remembers and grows — no retraining, no resets.'],
+                    ['🎤', 'Compete', 'Duel champions and debate other people’s agents — judged for real, on-chain.'],
+                    ['🧬', 'Breed', 'Combine two agents into a brand-new one — character, memory, and all.'],
+                  ] as const
+                ).map(([ic, t, d]) => (
+                  <div key={t} className="lfeat">
+                    <span className="lfeat-ic">{ic}</span>
+                    <strong>{t}</strong>
+                    <p>{d}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* ── PILLARS ────────────────────────────────────────────────────── */}
+            <section className="landing-section">
+              <p className="world-kicker">Why it’s different</p>
+              <h2 className="landing-h">Built so it can only be yours.</h2>
+              <div className="lpillars">
+                <div className="lpillar">
+                  <strong>🔒 Private by design</strong>
+                  <p>Every reply is computed in a TEE-verified enclave. No conversation ever touches a server that could read it.</p>
+                </div>
+                <div className="lpillar">
+                  <strong>🔑 You hold the keys</strong>
+                  <p>Everything is encrypted on your device with a key only your wallet can derive. Storage nodes only ever see ciphertext.</p>
+                </div>
+                <div className="lpillar">
+                  <strong>♾️ Yours to keep</strong>
+                  <p>Export it anytime, truly delete it, or rebuild it from 0G with your key alone. No lock-in, ever.</p>
+                </div>
+              </div>
+              <button className="cta landing-bottom-cta" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                Create your agent ↑
+              </button>
+            </section>
+          </div>
         ) : (
           <>
             <div className="shell">
