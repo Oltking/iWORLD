@@ -41,7 +41,8 @@ let cached: RelayConfig | null = null
 export function getRelayConfig(): RelayConfig {
   if (cached) return cached
   cached = {
-    port: Number(optional('RELAY_PORT', '8788')),
+    // Hosts (Render/Fly/Railway) inject PORT; honor it first, then RELAY_PORT, then default.
+    port: Number(process.env.PORT || optional('RELAY_PORT', '8788')),
     evmRpc: optional('ZG_EVM_RPC', 'https://evmrpc-testnet.0g.ai'),
     chainId: Number(optional('ZG_CHAIN_ID', '16602')),
     // Use a dedicated HOUSE_PRIVATE_KEY if set; otherwise reuse the wallet already in

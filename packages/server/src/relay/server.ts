@@ -79,7 +79,10 @@ async function main() {
   }
 
   const app = express()
-  app.use(cors({ origin: cfg.webOrigin }))
+  // RELAY_WEB_ORIGIN: "*" (reflect any), or a comma-separated allow-list. Auth is a
+  // wallet signature, so CORS isn't the security boundary — convenience over lockdown.
+  const corsOrigin = cfg.webOrigin === '*' ? true : cfg.webOrigin.split(',').map((s) => s.trim())
+  app.use(cors({ origin: corsOrigin }))
   app.use(express.json({ limit: '8mb' }))
 
   app.post('/store', async (req, res) => {
