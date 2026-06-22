@@ -24,6 +24,7 @@ import { FundingButton } from './components/FundingButton'
 import { Toaster } from './components/Toaster'
 import { Welcome } from './screens/Welcome'
 import { toast, humanizeError } from './lib/toast'
+import { diagnoseConnection, fixNetwork, type Health } from './lib/health'
 import type { MemoryMessage } from './lib/conversation-store'
 import type { KiprExport } from './lib/export'
 import type { Status } from './components/Dot'
@@ -214,6 +215,36 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
     if (conn) void refreshBalance(conn)
   }, [view, conn, refreshBalance])
 
+  // Connection health — warn up front if the wallet is on the wrong network or its RPC
+  // is dead, so the user fixes it before hitting a "network error" mid-create.
+  const [health, setHealth] = useState<Health | null>(null)
+  useEffect(() => {
+    if (!conn) {
+      setHealth(null)
+      return
+    }
+    let cancelled = false
+    diagnoseConnection(conn).then((h) => !cancelled && setHealth(h)).catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [conn])
+
+  const [fixing, setFixing] = useState(false)
+  async function onFixNetwork() {
+    setFixing(true)
+    try {
+      await fixNetwork()
+      const c = await connectWallet()
+      applyConnection(c, 'metamask')
+      toast.success('Network fixed — you’re on 0G with a working RPC.')
+    } catch (e) {
+      toast.error(humanizeError(e))
+    } finally {
+      setFixing(false)
+    }
+  }
+
   const short = conn ? `${conn.address.slice(0, 6)}…${conn.address.slice(-4)}` : null
 
   return (
@@ -287,6 +318,16 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                 )}
               </div>
               {unlockErr && <p className="err">{unlockErr}</p>}
+              {conn && health && !health.ok && (
+                <div className="lowfunds health">
+                  <span>⚠ {health.message}</span>
+                  {walletKind === 'metamask' && (
+                    <button className="chip-btn" onClick={onFixNetwork} disabled={fixing}>
+                      {fixing ? 'Fixing…' : 'Fix network'}
+                    </button>
+                  )}
+                </div>
+              )}
               {conn && balance !== null && Number(balance) < 0.05 && (
                 <div className="lowfunds">
                   <span>⚠ Low on 0G ({balance}). Saving to 0G needs a little gas.</span>
