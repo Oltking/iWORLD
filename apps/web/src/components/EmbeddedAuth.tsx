@@ -6,6 +6,7 @@
 import { useEffect } from 'react'
 import { usePrivy, useWallets } from '@privy-io/react-auth'
 import { connectionFromPrivyWallet, type PrivyWalletLike } from '../lib/privy'
+import { toast, humanizeError } from '../lib/toast'
 import type { Connection } from '../lib/wallet'
 
 export function EmbeddedAuth({
@@ -23,14 +24,14 @@ export function EmbeddedAuth({
     const embedded =
       (wallets.find((w) => w.walletClientType === 'privy') as PrivyWalletLike | undefined) ??
       (wallets[0] as PrivyWalletLike | undefined)
-    if (!embedded) return
+    if (!embedded) return // wallet still being created after login — effect re-runs when it lands
     let cancelled = false
     connectionFromPrivyWallet(embedded)
       .then((c) => {
         if (!cancelled) onConnection(c)
       })
-      .catch(() => {
-        /* surfaced as no connection; user can retry */
+      .catch((e) => {
+        if (!cancelled) toast.error(`Couldn't open your wallet on 0G: ${humanizeError(e)}`)
       })
     return () => {
       cancelled = true

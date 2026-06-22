@@ -42,6 +42,10 @@ export function subscribe(l: (t: Toast[]) => void): () => void {
 /** Map raw wallet/RPC/contract errors to something a human understands. */
 export function humanizeError(e: unknown): string {
   const msg = (e as { message?: string })?.message ?? String(e)
+  // Already a friendly, actionable message we wrote — don't flatten it.
+  if (/faucet|RPC URL|the 0G network|couldn’t reach the 0G|0G, so it can/i.test(msg)) {
+    return msg.length > 240 ? msg.slice(0, 240) + '…' : msg
+  }
   if (/user rejected|user denied|action_rejected|\b4001\b/i.test(msg)) return 'You declined in your wallet.'
   if (/insufficient funds|insufficient balance|exceeds balance|gas required|0 0G/i.test(msg))
     return 'Not enough 0G for gas — top up your wallet at faucet.0g.ai.'

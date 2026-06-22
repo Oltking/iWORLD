@@ -21,16 +21,18 @@ function explainUploadError(raw: unknown): Error {
   const code = (raw as { code?: number | string })?.code
   const looksLikeRpc =
     code === -32603 ||
-    /endpoint not found or unavailable|RPC submit|could not coalesce|failed to fetch|ECONNREFUSED/i.test(msg)
+    code === 'NETWORK_ERROR' ||
+    /endpoint not found or unavailable|RPC submit|could not coalesce|failed to fetch|ECONNREFUSED|network error|could not detect network|noNetwork|missing response/i.test(
+      msg,
+    )
   if (looksLikeRpc) {
     return new Error(
-      `Your wallet couldn't submit the transaction to 0G. This is a wallet RPC problem, not your funds — ` +
-        `MetaMask is using a stale endpoint for the 0G network. Fix it: open MetaMask → Networks → ` +
-        `“0G-Galileo-Testnet” → set the RPC URL to ${OG_TESTNET.evmRpc} (remove any others), then retry. ` +
-        `(The 0G network itself is up.)`,
+      `Your wallet couldn't reach the 0G network to submit the transaction — this is a wallet RPC ` +
+        `setting, not your funds. Fix it in your wallet: open the “0G-Galileo-Testnet” network and set ` +
+        `its RPC URL to ${OG_TESTNET.evmRpc} (remove any others), then retry. (We confirmed 0G itself is up.)`,
     )
   }
-  return new Error(`upload failed: ${msg}`)
+  return new Error(`Couldn't save to 0G: ${msg}`)
 }
 
 export interface UploadRef {
@@ -61,7 +63,13 @@ function withTimeout<T>(p: Promise<T>, ms: number, what: string): Promise<T> {
 export async function uploadBytes(signer: JsonRpcSigner, data: Uint8Array): Promise<UploadRef> {
   // Pre-flight: an empty wallet stalls silently at tx submission — fail clearly instead.
   const addr = await signer.getAddress()
-  const balance = await signer.provider.getBalance(addr)
+  let balance: bigint
+  try {
+    balance = await signer.provider.getBalance(addr)
+  } catch (e) {
+    // Reaching the chain for a balance read failed → it's the wallet's RPC, not the data.
+    throw explainUploadError(e)
+  }
   if (balance === 0n) {
     throw new Error(
       `This wallet has 0 0G, so it can't pay for storage. Get testnet 0G from https://faucet.0g.ai, then retry.`,
