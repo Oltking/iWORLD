@@ -15,6 +15,7 @@ import { getXP, levelFromXP } from '../lib/progress'
 import { ownedItems } from '../lib/items'
 import type { RosterAgent } from '../lib/roster'
 import { getLineage } from '../lib/lineage'
+import { getResults, summarize } from '../lib/record'
 import { CompanionOrb } from '../components/CompanionOrb'
 import type { PersonalityConfig } from '@kipr/core/personality'
 
@@ -61,6 +62,8 @@ export function World({
 }) {
   const activeId = agentIdOf(companion)
   const lineage = getLineage(activeId)
+  const history = getResults(activeId)
+  const rec = summarize(history)
   const level = levelFromXP(getXP(companion.ownerAddr))
   const gear = ownedItems(companion.ownerAddr)
   const [persona, setPersona] = useState<PersonalityConfig | null>(null)
@@ -174,6 +177,31 @@ export function World({
           <button className="ghost" onClick={onVault}>Yours</button>
         </div>
       </section>
+
+      {/* Track record — the agent's story so far */}
+      {rec.total > 0 && (
+        <section className="card">
+          <div className="card-h">
+            <span className="step">📜</span>
+            <h2>{companion.name}’s record</h2>
+          </div>
+          <div className="rec-summary">
+            <div className="rec-stat"><span className="rec-k">🎤 Debates</span><span className="rec-v">{rec.debates.w}W · {rec.debates.l}L{rec.debates.t ? ` · ${rec.debates.t}T` : ''}</span></div>
+            <div className="rec-stat"><span className="rec-k">⚔️ Duels</span><span className="rec-v">{rec.duels.w}W · {rec.duels.l}L{rec.duels.t ? ` · ${rec.duels.t}T` : ''}</span></div>
+          </div>
+          <ul className="rec-list">
+            {history.slice(0, 5).map((e, i) => (
+              <li key={i} className={`rec-row ${e.result}`}>
+                <span className="rec-ic">{e.kind === 'debate' ? '🎤' : '⚔️'}</span>
+                <span className="rec-detail">
+                  {e.kind === 'debate' ? <>“{e.detail}” <span className="muted small">vs {e.opponent}</span></> : <>{e.opponent} <span className="muted small">{e.detail}</span></>}
+                </span>
+                <span className={`rec-out ${e.result}`}>{e.result === 'win' ? 'WON' : e.result === 'tie' ? 'TIE' : 'LOST'}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* Make it truly yours — mint nudge (only until minted) */}
       {!companion.tokenId && (

@@ -4,7 +4,8 @@
  */
 import { useEffect, useState } from 'react'
 import type { Connection } from '../lib/wallet'
-import type { ActiveCompanion } from '../lib/session'
+import { agentIdOf, type ActiveCompanion } from '../lib/session'
+import { addResult } from '../lib/record'
 import { loadPersonality } from '../lib/companion-store'
 import { relayConfigured } from '../lib/compute-relay'
 import {
@@ -64,6 +65,14 @@ export function Debate({ conn, ownerKey, companion }: { conn: Connection; ownerK
       setVerdict(res.verdict)
       setTranscriptHash(res.transcriptHash)
       setWaitingFor('')
+      addResult(agentIdOf(companion), {
+        kind: 'debate',
+        opponent: opp.name,
+        result: res.verdict.winner === 'you' ? 'win' : res.verdict.winner === 'tie' ? 'tie' : 'loss',
+        detail: motion,
+        at: new Date().toISOString(),
+        hash: res.transcriptHash,
+      })
       if (res.verdict.winner === 'you') {
         const gained = 12
         setXp(addXP(companion.ownerAddr, gained))

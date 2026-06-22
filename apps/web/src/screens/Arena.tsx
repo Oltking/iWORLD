@@ -7,6 +7,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Connection } from '../lib/wallet'
 import type { ActiveCompanion } from '../lib/session'
+import { agentIdOf } from '../lib/session'
+import { addResult } from '../lib/record'
 import { runDuel, styleFromText, TACTIC_ICON, type Fighter, type MatchResult } from '../lib/arena'
 import { champions, type Champion } from '../lib/champions'
 import { loadPersonality } from '../lib/companion-store'
@@ -89,6 +91,15 @@ export function Arena({
     setDrop(null)
     setAnchored(false)
     setAnchorStatus('idle')
+
+    addResult(agentIdOf(companion), {
+      kind: 'duel',
+      opponent: `${champ.name} ${champ.title}`,
+      result: res.winner === 'a' ? 'win' : res.winner === 'draw' ? 'tie' : 'loss',
+      detail: `Lv ${champ.level}`,
+      at: new Date().toISOString(),
+      hash: res.transcriptHash,
+    })
 
     res.rounds.forEach((_, i) => {
       timers.current.push(window.setTimeout(() => setShown(i + 1), (i + 1) * 800))
