@@ -296,11 +296,14 @@ export function Arena({
             {hof.map((r, i) => {
               const me = r.addr === conn.address.toLowerCase()
               return (
-                <li key={r.addr} className={`lrow ${me ? 'you' : ''}`}>
-                  <span className="lrank">{i === 0 ? '👑' : `#${i + 1}`}</span>
-                  <span className="lname mono">{r.addr.slice(0, 6)}…{r.addr.slice(-4)}<CopyButton text={r.addr} label="Copy address" />{me && <span className="lyou"> · you</span>}</span>
-                  <span className="llvl">{r.wins}W / {r.matches}</span>
-                  <span className="lduel-spacer" />
+                <li key={r.addr} className={`hof-row ${me ? 'you' : ''}`}>
+                  <span className="hof-rank">{i === 0 ? '👑' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}</span>
+                  <span className="hof-addr">
+                    <span className="mono">{r.addr.slice(0, 6)}…{r.addr.slice(-4)}</span>
+                    <CopyButton text={r.addr} label="Copy address" />
+                    {me && <span className="lyou">you</span>}
+                  </span>
+                  <span className="hof-score">{r.wins}W / {r.matches}</span>
                 </li>
               )
             })}

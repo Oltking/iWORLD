@@ -341,17 +341,17 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                 <nav className="tabs">
                   {companion ? (
                     <>
-                      <button className={['world', 'breed', 'debate', 'square'].includes(view) ? 'tab on' : 'tab'} onClick={() => setView('world')}>World</button>
-                      <button className={view === 'chat' ? 'tab on' : 'tab'} onClick={() => setView('chat')}>Chat</button>
-                      <button className={view === 'train' ? 'tab on' : 'tab'} onClick={() => setView('train')}>Train</button>
-                      <button className={view === 'arena' ? 'tab on' : 'tab'} onClick={() => setView('arena')}>Arena</button>
-                      <button className={view === 'market' ? 'tab on' : 'tab'} onClick={() => setView('market')}>Market</button>
-                      <button className={view === 'vault' ? 'tab on' : 'tab'} onClick={() => setView('vault')}>Yours</button>
+                      <button className={['world', 'breed', 'debate', 'square'].includes(view) ? 'tab on' : 'tab'} onClick={() => setView('world')}><span className="tab-ic" aria-hidden="true">🌍</span>World</button>
+                      <button className={view === 'chat' ? 'tab on' : 'tab'} onClick={() => setView('chat')}><span className="tab-ic" aria-hidden="true">💬</span>Chat</button>
+                      <button className={view === 'train' ? 'tab on' : 'tab'} onClick={() => setView('train')}><span className="tab-ic" aria-hidden="true">🎓</span>Train</button>
+                      <button className={view === 'arena' ? 'tab on' : 'tab'} onClick={() => setView('arena')}><span className="tab-ic" aria-hidden="true">⚔️</span>Arena</button>
+                      <button className={view === 'market' ? 'tab on' : 'tab'} onClick={() => setView('market')}><span className="tab-ic" aria-hidden="true">🪙</span>Market</button>
+                      <button className={view === 'vault' ? 'tab on' : 'tab'} onClick={() => setView('vault')}><span className="tab-ic" aria-hidden="true">🔐</span>Yours</button>
                     </>
                   ) : (
                     <>
-                      <button className={view === 'create' ? 'tab on' : 'tab'} onClick={() => setView('create')}>Create</button>
-                      <button className={view === 'vault' ? 'tab on' : 'tab'} onClick={() => setView('vault')}>Yours</button>
+                      <button className={view === 'create' ? 'tab on' : 'tab'} onClick={() => setView('create')}><span className="tab-ic" aria-hidden="true">✨</span>Create</button>
+                      <button className={view === 'vault' ? 'tab on' : 'tab'} onClick={() => setView('vault')}><span className="tab-ic" aria-hidden="true">🔐</span>Yours</button>
                     </>
                   )}
                 </nav>

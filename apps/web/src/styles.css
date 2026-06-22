@@ -782,3 +782,27 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .l-buy { margin-left: auto; }
   .toaster { bottom: 14px; }
 }
+
+/* ── Hall of Fame rows (clean: rank | address+copy | score) ─────────────── */
+.hof-row { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 13px; border-radius: 12px; background: rgba(255, 255, 255, 0.025); border: 1px solid var(--line); }
+.hof-row.you { border-color: rgba(139, 92, 246, 0.5); background: rgba(139, 92, 246, 0.12); box-shadow: 0 0 16px -8px rgba(139, 92, 246, 0.6); }
+.hof-rank { font-weight: 800; font-size: 15px; text-align: center; }
+.hof-addr { display: flex; align-items: center; gap: 5px; min-width: 0; }
+.hof-addr .mono { font-size: 13px; color: var(--ink); }
+.hof-addr .lyou { background: var(--violet); color: #fff; font-size: 9.5px; font-weight: 800; letter-spacing: 0.5px; padding: 2px 7px; border-radius: 999px; }
+.hof-score { font-size: 13px; font-weight: 800; color: var(--ink); white-space: nowrap; }
+
+/* ── Desktop refinements: nav icons · World dashboard · fixed-height chat ── */
+.tab-ic { display: none; }
+@media (min-width: 900px) {
+  .tab { display: flex; align-items: center; gap: 10px; }
+  .tab-ic { display: inline; font-size: 15px; line-height: 1; }
+  /* Chat becomes a self-contained panel: thread scrolls, composer pinned. */
+  .chat { height: calc(100vh - 96px); display: flex; flex-direction: column; }
+  .chat .thread { flex: 1 1 auto; overflow-y: auto; min-height: 0; }
+}
+@media (min-width: 1000px) {
+  /* World hub → 2-column dashboard; the agent + roster span the full width. */
+  .world { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  .world > .world-hero, .world > .roster, .world > .agent-card { grid-column: 1 / -1; }
+}
