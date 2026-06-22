@@ -214,8 +214,13 @@ export function World({
             <h2>Make it truly yours</h2>
           </div>
           <p className="muted small">
-            Mint <strong>{companion.name}</strong> as an iNFT — a token only you hold. It proves ownership
-            forever and unlocks the Marketplace and gifting. Costs about 0.001 0G.
+            <strong>{companion.name}</strong> is encrypted and saved on 0G — but until you mint it, you can
+            only find it again from <strong>this browser, with this wallet</strong>. Switch wallets or
+            devices and it won’t appear (the data is safe, just not pointed to).
+          </p>
+          <p className="muted small">
+            <strong>Mint it (≈0.001 0G)</strong> to make it permanent and recoverable <em>anywhere</em>, and
+            to unlock the Marketplace + gifting.
           </p>
           <button onClick={onShape}>Mint in the Studio →</button>
         </section>

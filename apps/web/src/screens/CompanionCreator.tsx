@@ -312,6 +312,12 @@ export function CompanionCreator({
           Who it is, how it talks, what it holds to — you decide, and it's yours. Nothing here can be
           changed behind your back: every detail is sealed under a version only you can move.
         </p>
+        {!editing && (
+          <p className="muted small" style={{ maxWidth: '31rem' }}>
+            Already made one? Each <strong>wallet</strong> (and each email) has its own agents — connect
+            the exact one that created it. On a new device, bring it back in <strong>Yours → Restore</strong>.
+          </p>
+        )}
       </section>
 
       <section className="card">
