@@ -8,6 +8,8 @@ import { formatEther, parseEther } from 'ethers'
 import type { Connection } from '../lib/wallet'
 import type { ActiveCompanion } from '../lib/session'
 import { fetchListings, listAgent, buyAgent, cancelListing, type Listing } from '../lib/market'
+import { metaConfigured, publishCard, fetchCard, type AgentCard } from '../lib/listing-meta'
+import { getXP, levelFromXP } from '../lib/progress'
 import { toast, humanizeError } from '../lib/toast'
 import { OG_TESTNET } from '../lib/og'
 import { CompanionOrb } from '../components/CompanionOrb'
@@ -18,15 +20,24 @@ const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`
 export function Market({ conn, companion }: { conn: Connection; companion: ActiveCompanion | null }) {
   const me = conn.address.toLowerCase()
   const [listings, setListings] = useState<Listing[] | null>(null)
+  const [cards, setCards] = useState<Record<string, AgentCard>>({})
   const [err, setErr] = useState('')
   const [price, setPrice] = useState('')
+  const [blurb, setBlurb] = useState('')
   const [listStatus, setListStatus] = useState<Status>('idle')
   const [busyToken, setBusyToken] = useState<string>('')
 
   const refresh = useCallback(async () => {
     setErr('')
     try {
-      setListings(await fetchListings(conn.provider))
+      const ls = await fetchListings(conn.provider)
+      setListings(ls)
+      if (metaConfigured()) {
+        const entries = await Promise.all(
+          ls.map(async (l) => [l.tokenId, await fetchCard(conn.provider, l.tokenId)] as const),
+        )
+        setCards(Object.fromEntries(entries.filter(([, c]) => c)) as Record<string, AgentCard>)
+      }
     } catch (e) {
       setErr((e as Error).message)
       setListings([])
@@ -46,7 +57,20 @@ export function Market({ conn, companion }: { conn: Connection; companion: Activ
     setErr('')
     try {
       await listAgent(conn.signer, companion.tokenId, parseEther(price))
+      // Publish a public shop-window card so buyers see who they're buying (best-effort).
+      if (metaConfigured()) {
+        try {
+          await publishCard(conn.signer, companion.tokenId, {
+            name: companion.name,
+            blurb: blurb.trim(),
+            level: levelFromXP(getXP(me)),
+          })
+        } catch {
+          /* listing still succeeded; card is optional */
+        }
+      }
       setPrice('')
+      setBlurb('')
       setListStatus('ok')
       toast.success(`${companion.name} is listed for ${price} 0G 🏷️`)
       await refresh()
@@ -106,6 +130,7 @@ export function Market({ conn, companion }: { conn: Connection; companion: Activ
         ) : (
           <>
             <p className="muted small">List <strong>{companion.name}</strong> (Agent #{companion.tokenId}). One approval + one listing tx.</p>
+            <input className="inp" value={blurb} onChange={(e) => setBlurb(e.target.value)} placeholder="A short blurb buyers will see (optional)" maxLength={90} style={{ marginBottom: 8 }} />
             <div className="composer">
               <input className="inp" type="number" min="0" step="0.001" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Price in 0G" />
               <button className="send" onClick={onList} disabled={listStatus === 'busy' || !price} title="List for sale" style={{ width: 'auto', borderRadius: 12, padding: '0 18px' }}>
@@ -131,13 +156,20 @@ export function Market({ conn, companion }: { conn: Connection; companion: Activ
           <div className="listings">
             {listings.map((l) => {
               const mine = l.seller.toLowerCase() === me
+              const card = cards[l.tokenId]
               return (
                 <div key={l.tokenId} className="listing">
                   <CompanionOrb size={44} state="idle" seed={l.dataHash || l.tokenId} />
                   <div className="l-info">
-                    <strong>Agent #{l.tokenId}</strong>
-                    <span className="muted small mono">{(l.dataHash || '').slice(0, 12)}…</span>
-                    <span className="muted small">by {mine ? 'you' : short(l.seller)}</span>
+                    <strong>{card?.name ? `${card.name} · #${l.tokenId}` : `Agent #${l.tokenId}`}</strong>
+                    {card?.blurb ? (
+                      <span className="muted small">“{card.blurb}”</span>
+                    ) : (
+                      <span className="muted small mono">{(l.dataHash || '').slice(0, 12)}…</span>
+                    )}
+                    <span className="muted small">
+                      {card?.level ? `⭐ Lv ${card.level} · ` : ''}by {mine ? 'you' : short(l.seller)}
+                    </span>
                   </div>
                   <div className="l-buy">
                     <span className="l-price">{formatEther(l.price)} 0G</span>
