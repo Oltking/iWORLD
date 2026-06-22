@@ -14,7 +14,7 @@ import { addXP, getXP, levelFromXP } from '../lib/progress'
 import { ownedStyleBoost, ownedXpBonus, rollDrop, addItem, type Item } from '../lib/items'
 import { encryptOwned } from '../lib/crypto'
 import { uploadBytes } from '../lib/storage'
-import { arenaLogConfigured, anchorMatch, getRecord, type MatchResult as ChainResult } from '../lib/arena-log'
+import { arenaLogConfigured, anchorMatch, getRecord, fetchLeaderboard, type RankRow, type MatchResult as ChainResult } from '../lib/arena-log'
 import { toast, humanizeError } from '../lib/toast'
 import { CompanionOrb } from '../components/CompanionOrb'
 import { OG_TESTNET } from '../lib/og'
@@ -45,11 +45,13 @@ export function Arena({
   const [anchorStatus, setAnchorStatus] = useState<Status>('idle')
   const [anchored, setAnchored] = useState(false)
   const [record, setRecord] = useState<{ matches: number; wins: number } | null>(null)
+  const [hof, setHof] = useState<RankRow[] | null>(null)
   const timers = useRef<number[]>([])
 
   const loadRecord = useCallback(() => {
     if (!arenaLogConfigured()) return
     getRecord(conn.provider, conn.address).then(setRecord).catch(() => {})
+    fetchLeaderboard(conn.provider).then(setHof).catch(() => setHof([]))
   }, [conn])
   useEffect(() => loadRecord(), [loadRecord])
 
@@ -268,6 +270,31 @@ export function Arena({
           ))}
         </ol>
       </section>
+
+      {/* Hall of Fame — global, on-chain records (arena + debate verdicts) */}
+      {arenaLogConfigured() && hof && hof.length > 0 && (
+        <section className="card">
+          <div className="card-h">
+            <span className="step">👑</span>
+            <h2>Hall of Fame</h2>
+            <span className="muted small" style={{ marginLeft: 'auto' }}>on-chain · global</span>
+          </div>
+          <p className="muted small">Top records anchored on-chain — arena duels and debate verdicts combined.</p>
+          <ol className="ladder">
+            {hof.map((r, i) => {
+              const me = r.addr === conn.address.toLowerCase()
+              return (
+                <li key={r.addr} className={`lrow ${me ? 'you' : ''}`}>
+                  <span className="lrank">{i === 0 ? '👑' : `#${i + 1}`}</span>
+                  <span className="lname mono">{r.addr.slice(0, 6)}…{r.addr.slice(-4)}{me && <span className="lyou"> · you</span>}</span>
+                  <span className="llvl">{r.wins}W / {r.matches}</span>
+                  <span className="lduel-spacer" />
+                </li>
+              )
+            })}
+          </ol>
+        </section>
+      )}
     </div>
   )
 }

@@ -84,6 +84,26 @@ export function Debate({ conn, ownerKey, companion }: { conn: Connection; ownerK
     }
   }
 
+  async function share() {
+    if (!verdict) return
+    const card = [
+      `🎤 iWORLD Debate`,
+      `“${motion}”`,
+      ``,
+      `${companion.name} ${verdict.you} — ${verdict.opp} ${opp.name}`,
+      verdict.winner === 'you' ? `🏆 ${companion.name} wins!` : verdict.winner === 'tie' ? `⚖️ A tie.` : `${opp.name} wins.`,
+      `“${verdict.reason}”`,
+      ``,
+      `verdict ${transcriptHash.slice(0, 18)}… · iworld-ai.vercel.app`,
+    ].join('\n')
+    try {
+      await navigator.clipboard.writeText(card)
+      toast.success('Verdict card copied — paste it anywhere 📋')
+    } catch {
+      toast.info('Copy not available here.')
+    }
+  }
+
   async function anchor() {
     if (!verdict || !transcriptHash) return
     setAnchorStatus('busy')
@@ -186,11 +206,14 @@ export function Debate({ conn, ownerKey, companion }: { conn: Connection; ownerK
                 {verdict.winner === 'you' ? `🏆 ${companion.name} wins!` : verdict.winner === 'tie' ? '⚖️ A tie.' : `${opp.name} wins.`}
               </p>
               <p className="muted small">“{verdict.reason}”</p>
-              {arenaLogConfigured() && (
-                <button className="ghost" onClick={anchor} disabled={anchorStatus === 'busy' || anchored} style={{ marginTop: 8 }}>
-                  {anchorStatus === 'busy' ? 'Anchoring…' : anchored ? 'Verdict anchored ⛓️' : 'Anchor verdict on-chain'}
-                </button>
-              )}
+              <div className="memrow" style={{ marginTop: 8, justifyContent: 'center' }}>
+                <button className="ghost" onClick={share} style={{ width: 'auto', padding: '7px 14px' }}>📋 Share</button>
+                {arenaLogConfigured() && (
+                  <button className="ghost" onClick={anchor} disabled={anchorStatus === 'busy' || anchored} style={{ width: 'auto', padding: '7px 14px' }}>
+                    {anchorStatus === 'busy' ? 'Anchoring…' : anchored ? 'Anchored ⛓️' : 'Anchor on-chain'}
+                  </button>
+                )}
+              </div>
               <p className="muted small center mono">{transcriptHash.slice(0, 18)}…</p>
             </div>
           )}
