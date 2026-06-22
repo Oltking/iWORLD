@@ -34,27 +34,36 @@ async function getToken(signer: JsonRpcSigner, force = false): Promise<RelayToke
   return token
 }
 
+const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms))
+
 /** Run one chat completion through the shared pool. Browser → provider direct (private). */
 export async function relayChat(signer: JsonRpcSigner, messages: ChatMessage[]): Promise<ChatResult> {
-  let { authorization, endpoint, model, provider } = await getToken(signer)
-
-  let r = await fetch(`${endpoint}/chat/completions`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: authorization },
-    body: JSON.stringify({ model, messages }),
-  })
-  // A stale cached token → mint a fresh one once and retry.
-  if (r.status === 401 || r.status === 403) {
-    ;({ authorization, endpoint, model, provider } = await getToken(signer, true))
-    r = await fetch(`${endpoint}/chat/completions`, {
+  let token = await getToken(signer)
+  const call = () =>
+    fetch(`${token.endpoint}/chat/completions`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: authorization },
-      body: JSON.stringify({ model, messages }),
+      headers: { 'Content-Type': 'application/json', Authorization: token.authorization },
+      body: JSON.stringify({ model: token.model, messages }),
     })
+
+  // Retry: refresh a stale token (401/403), and back off on provider rate limits (429) —
+  // a debate fires several calls in a row, so a transient 429 shouldn't kill it.
+  let r = await call()
+  for (let attempt = 0; !r.ok && attempt < 4; attempt++) {
+    if (r.status === 401 || r.status === 403) {
+      token = await getToken(signer, true)
+    } else if (r.status === 429 || r.status === 503) {
+      await sleep(900 * 2 ** attempt) // 0.9s, 1.8s, 3.6s, 7.2s
+    } else {
+      break
+    }
+    r = await call()
   }
+  const { model, provider } = token
   if (!r.ok) {
     const b = await r.text().catch(() => '')
-    throw new Error(`Inference failed: HTTP ${r.status} ${b.slice(0, 150)}`)
+    const hint = r.status === 429 ? ' (the shared pool is busy — give it a few seconds and retry)' : ''
+    throw new Error(`Inference failed: HTTP ${r.status}${hint} ${b.slice(0, 120)}`)
   }
   const data: { choices?: { message?: { content?: string } }[]; id?: string } = await r.json()
   const content = data?.choices?.[0]?.message?.content ?? ''
