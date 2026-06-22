@@ -11,6 +11,8 @@ import { fetchListings, listAgent, buyAgent, cancelListing, type Listing } from 
 import { metaConfigured, publishCard, fetchCard, type AgentCard } from '../lib/listing-meta'
 import { getXP, levelFromXP } from '../lib/progress'
 import { toast, humanizeError } from '../lib/toast'
+import { celebrate } from '../lib/celebrate'
+import { SkeletonList } from '../components/Skeleton'
 import { OG_TESTNET } from '../lib/og'
 import { CompanionOrb } from '../components/CompanionOrb'
 import type { Status } from '../components/Dot'
@@ -84,6 +86,7 @@ export function Market({ conn, companion }: { conn: Connection; companion: Activ
     setBusyToken(l.tokenId)
     try {
       await buyAgent(conn.signer, l.tokenId, l.price)
+      celebrate()
       toast.success(`Bought Agent #${l.tokenId} — it’s yours now 🎉`)
       await refresh()
     } catch (e) {
@@ -149,7 +152,7 @@ export function Market({ conn, companion }: { conn: Connection; companion: Activ
           <button className="ghost" onClick={refresh} style={{ width: 'auto', marginLeft: 'auto', padding: '6px 12px', fontSize: 12 }}>Refresh</button>
         </div>
         {listings === null ? (
-          <p className="muted small">Loading the square…</p>
+          <SkeletonList rows={3} />
         ) : listings.length === 0 ? (
           <p className="muted small">No agents listed yet. Be the first to put one up.</p>
         ) : (

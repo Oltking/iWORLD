@@ -604,6 +604,23 @@ code {
 }
 .devlink:hover:not(:disabled) { transform: none; box-shadow: none; color: var(--muted); background: rgba(255,255,255,0.04); }
 
+/* ── Confetti ───────────────────────────────────────────────────────────── */
+.confetti-root { position: fixed; inset: 0; pointer-events: none; z-index: 100; overflow: hidden; }
+.confetti { position: absolute; top: -12px; width: 9px; height: 14px; border-radius: 2px; opacity: 0.95; animation: confettiFall linear forwards; }
+@keyframes confettiFall {
+  0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(108vh) rotate(var(--spin, 360deg)); opacity: 0.9; }
+}
+
+/* ── Skeletons ──────────────────────────────────────────────────────────── */
+.sk-row { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,0.02); }
+.sk-lines { display: flex; flex-direction: column; gap: 7px; flex: 1; }
+.sk { background: linear-gradient(100deg, rgba(255,255,255,0.05) 30%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.05) 70%); background-size: 200% 100%; animation: shimmer 1.3s ease-in-out infinite; border-radius: 8px; }
+.sk-orb { width: 44px; height: 44px; border-radius: 999px; flex: none; }
+.sk-line { height: 10px; }
+.sk-pill { width: 64px; height: 26px; border-radius: 999px; flex: none; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
 /* ── Accessibility ──────────────────────────────────────────────────────── */
 /* Visible keyboard focus on every interactive element. */
 button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible {

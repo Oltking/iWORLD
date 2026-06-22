@@ -27,6 +27,7 @@ import { persistPersonality, loadPersonality } from '../lib/companion-store'
 import { mintAgent, agentNftConfigured, type MintResult } from '../lib/mint'
 import { addVersion, getVersions } from '../lib/personality-history'
 import { toast, humanizeError } from '../lib/toast'
+import { celebrate } from '../lib/celebrate'
 import { OG_TESTNET } from '../lib/og'
 import { Dot, type Status } from '../components/Dot'
 import { CompanionOrb } from '../components/CompanionOrb'
@@ -266,6 +267,7 @@ export function CompanionCreator({
       setMinted(res)
       setMintStatus('ok')
       if (res.tokenId) onMinted(res.tokenId)
+      celebrate()
       toast.success(`Minted! ${config.name} is Agent #${res.tokenId ?? '—'}, yours on-chain 🪙`)
     } catch (e) {
       setMintErr((e as Error).message)

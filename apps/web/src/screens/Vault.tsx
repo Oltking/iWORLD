@@ -15,6 +15,7 @@ import { buildExport, downloadJson, parseExport, type KiprExport } from '../lib/
 import { conversationHeadKey, type ActiveCompanion } from '../lib/session'
 import { transferConfigured, hasTransferKey, registerToReceive, transferAgent, claimAgent } from '../lib/transfer'
 import { toast, humanizeError } from '../lib/toast'
+import { celebrate } from '../lib/celebrate'
 import type { Status } from '../components/Dot'
 
 export function Vault({
@@ -74,8 +75,9 @@ export function Vault({
     setTransferErr('')
     setTransferMsg('')
     try {
+      const id = companion.tokenId
       await transferAgent(conn.signer, ownerKey, companion, sendTo)
-      setTransferMsg(`✓ ${companion.name} transferred — brain and all. They can claim it now.`)
+      setTransferMsg(`✓ ${companion.name} sent — brain and all. Tell them: open iWORLD → Yours → "Claim an agent" → enter token #${id}.`)
       setSendStatus('ok')
       toast.success(`${companion.name} sent — brain and all 🤝`)
       setTimeout(onDelete, 2500) // you gave it away; clear local state
@@ -95,6 +97,7 @@ export function Vault({
       const c = await claimAgent(conn.signer, ownerKey, claimToken)
       setTransferMsg(`✓ Claimed ${c.name} (Agent #${c.tokenId}) — it’s yours now, brain and all.`)
       setClaimStatus('ok')
+      celebrate()
       toast.success(`Claimed ${c.name} — brain and all 🎉`)
       onClaimed(c)
     } catch (e) {
