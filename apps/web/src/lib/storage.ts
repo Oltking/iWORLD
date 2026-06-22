@@ -10,9 +10,35 @@
 import type { JsonRpcSigner } from 'ethers'
 import { Indexer, MemData } from '@0gfoundation/0g-storage-ts-sdk'
 import { OG_TESTNET } from './og'
+import { relayAuthSig, toBase64, fromBase64 } from './relay-auth'
+
+// On an HTTPS page the browser blocks 0G's HTTP storage nodes (mixed content). When a
+// storage relay is configured we route the (already-encrypted) bytes through it: the
+// relay uploads to 0G from Node, pays the tiny gas, and only ever sees ciphertext.
+const STORAGE_RELAY = (import.meta.env.VITE_STORAGE_RELAY_URL as string | undefined) || ''
+export const storageRelayConfigured = (): boolean => !!STORAGE_RELAY
 
 function makeIndexer(): Indexer {
   return new Indexer(OG_TESTNET.indexerRpc)
+}
+
+async function relayUpload(signer: JsonRpcSigner, data: Uint8Array): Promise<UploadRef> {
+  const sig = await relayAuthSig(signer)
+  const r = await fetch(`${STORAGE_RELAY}/store`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-iworld-auth': sig },
+    body: JSON.stringify({ data: toBase64(data) }),
+  })
+  const d = (await r.json().catch(() => ({}))) as { rootHash?: string; txHash?: string; error?: string }
+  if (!r.ok || !d.rootHash) throw new Error(d.error || `Storage relay failed (HTTP ${r.status}).`)
+  return { rootHash: d.rootHash, txHash: d.txHash ?? '' }
+}
+
+async function relayDownload(rootHash: string): Promise<Uint8Array> {
+  const r = await fetch(`${STORAGE_RELAY}/fetch/${rootHash}`)
+  const d = (await r.json().catch(() => ({}))) as { data?: string; error?: string }
+  if (!r.ok || !d.data) throw new Error(d.error || `Storage fetch failed (HTTP ${r.status}).`)
+  return fromBase64(d.data)
 }
 
 /** Turn an opaque wallet/RPC submit failure into actionable guidance. */
@@ -61,6 +87,9 @@ function withTimeout<T>(p: Promise<T>, ms: number, what: string): Promise<T> {
 
 /** Upload opaque bytes to 0G. Bytes should already be encrypted for production data. */
 export async function uploadBytes(signer: JsonRpcSigner, data: Uint8Array): Promise<UploadRef> {
+  // Relay path: the house pays + uploads, so the user needs no 0G and no HTTP node access.
+  if (storageRelayConfigured()) return relayUpload(signer, data)
+
   // Pre-flight: an empty wallet stalls silently at tx submission — fail clearly instead.
   const addr = await signer.getAddress()
   let balance: bigint
@@ -95,6 +124,7 @@ export async function uploadBytes(signer: JsonRpcSigner, data: Uint8Array): Prom
 
 /** Download opaque bytes from 0G by rootHash (in-memory, browser-safe). */
 export async function downloadBytes(rootHash: string): Promise<Uint8Array> {
+  if (storageRelayConfigured()) return relayDownload(rootHash)
   const indexer = makeIndexer()
   const [blob, dlErr] = await indexer.downloadToBlob(rootHash, { proof: true })
   if (dlErr !== null) throw new Error(`download failed: ${dlErr.message ?? String(dlErr)}`)

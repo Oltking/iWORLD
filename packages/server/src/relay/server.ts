@@ -16,23 +16,36 @@ import express from 'express'
 import cors from 'cors'
 import { ethers } from 'ethers'
 import { createZGComputeNetworkBroker } from '@0gfoundation/0g-compute-ts-sdk'
-import { pickTeeMLProvider, ensureInferenceFunding } from '@kipr/og'
+import {
+  pickTeeMLProvider,
+  ensureInferenceFunding,
+  getChainContext,
+  uploadBytes as ogUpload,
+  downloadBytes as ogDownload,
+  type ChainContext,
+} from '@kipr/og'
 import { getRelayConfig, relayAuthMessage, utcDay } from './config.js'
 
 type Broker = Awaited<ReturnType<typeof createZGComputeNetworkBroker>>
 
 const quota = new Map<string, { day: string; count: number }>()
+const storeQuota = new Map<string, { day: string; count: number }>()
 
-function takeQuota(addr: string, limit: number): boolean {
+function take(map: Map<string, { day: string; count: number }>, addr: string, limit: number): boolean {
   const day = utcDay()
-  const q = quota.get(addr)
+  const q = map.get(addr)
   if (!q || q.day !== day) {
-    quota.set(addr, { day, count: 1 })
+    map.set(addr, { day, count: 1 })
     return true
   }
   if (q.count >= limit) return false
   q.count++
   return true
+}
+const takeQuota = (addr: string, limit: number) => take(quota, addr, limit)
+
+function recover(sig: string): string {
+  return ethers.verifyMessage(relayAuthMessage(utcDay()), sig).toLowerCase()
 }
 
 async function main() {
@@ -55,9 +68,54 @@ async function main() {
   const { endpoint, model } = await broker.inference.getServiceMetadata(service.provider)
   console.log(`  shared ledger ready · endpoint ${endpoint}`)
 
+  // Storage relay: upload/serve ciphertext to/from 0G from Node (HTTP nodes, no browser
+  // mixed-content block). The house wallet pays the tiny gas; it only sees ciphertext.
+  let storeCtx: ChainContext | null = null
+  try {
+    storeCtx = getChainContext()
+    console.log(`  storage relay ready · payer ${storeCtx.address}`)
+  } catch (e) {
+    console.warn('  storage relay disabled (set ZG_PRIVATE_KEY to enable):', (e as Error).message)
+  }
+
   const app = express()
   app.use(cors({ origin: cfg.webOrigin }))
-  app.use(express.json())
+  app.use(express.json({ limit: '8mb' }))
+
+  app.post('/store', async (req, res) => {
+    if (!storeCtx) return res.status(503).json({ error: 'Storage relay not configured.' })
+    try {
+      const sig = String(req.headers['x-iworld-auth'] ?? '')
+      let addr: string
+      try {
+        addr = recover(sig)
+      } catch {
+        return res.status(401).json({ error: 'Invalid auth signature.' })
+      }
+      if (!take(storeQuota, addr, cfg.dailyQuota * 8)) {
+        return res.status(429).json({ error: 'Daily storage limit reached. Try again tomorrow.' })
+      }
+      const b64 = String((req.body as { data?: string }).data ?? '')
+      if (!b64) return res.status(400).json({ error: 'Missing data.' })
+      const bytes = new Uint8Array(Buffer.from(b64, 'base64'))
+      // Bytes are already encrypted client-side — store as opaque (no extra encryption).
+      const { rootHash, txHash } = await ogUpload(storeCtx, bytes, { encryptToSelf: false })
+      res.json({ rootHash, txHash })
+    } catch (e) {
+      console.error('store error:', (e as Error).message)
+      res.status(500).json({ error: `Couldn't store to 0G: ${(e as Error).message}` })
+    }
+  })
+
+  app.get('/fetch/:rootHash', async (req, res) => {
+    if (!storeCtx) return res.status(503).json({ error: 'Storage relay not configured.' })
+    try {
+      const bytes = await ogDownload(storeCtx, req.params.rootHash, { decrypt: false })
+      res.json({ data: Buffer.from(bytes).toString('base64') })
+    } catch (e) {
+      res.status(500).json({ error: `Couldn't fetch from 0G: ${(e as Error).message}` })
+    }
+  })
 
   app.get('/health', async (_req, res) => {
     const bal = await provider.getBalance(house.address).catch(() => 0n)

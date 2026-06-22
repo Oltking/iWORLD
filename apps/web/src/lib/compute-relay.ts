@@ -5,29 +5,15 @@
  * browser straight to the TeeML provider. The relay never sees a word.
  */
 import type { JsonRpcSigner } from 'ethers'
+import { relayAuthSig } from './relay-auth'
 import type { ChatMessage, ChatResult } from './compute'
 
 const RELAY = (import.meta.env.VITE_COMPUTE_RELAY_URL as string | undefined) || ''
 export const relayConfigured = (): boolean => !!RELAY
 
-// Must match the relay server's relayAuthMessage().
-const utcDay = () => new Date().toISOString().slice(0, 10)
-const authMessage = (day: string) => `iWORLD compute access\nDay: ${day}`
-
-let cachedSig: { day: string; sig: string } | null = null
-
-/** Sign (once/day, cached — no popup spam) to prove identity to the relay. */
-async function authSig(signer: JsonRpcSigner): Promise<string> {
-  const day = utcDay()
-  if (cachedSig?.day === day) return cachedSig.sig
-  const sig = await signer.signMessage(authMessage(day))
-  cachedSig = { day, sig }
-  return sig
-}
-
 /** Run one chat completion through the shared pool. Browser → provider direct (private). */
 export async function relayChat(signer: JsonRpcSigner, messages: ChatMessage[]): Promise<ChatResult> {
-  const sig = await authSig(signer)
+  const sig = await relayAuthSig(signer)
   const tr = await fetch(`${RELAY}/token`, { method: 'POST', headers: { 'x-iworld-auth': sig } })
   const td = (await tr.json().catch(() => ({}))) as {
     authorization?: string

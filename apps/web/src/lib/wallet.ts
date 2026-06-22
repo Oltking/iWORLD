@@ -58,8 +58,19 @@ async function ensureOgNetwork(provider: BrowserProvider): Promise<void> {
       }
       return
     } catch (err) {
-      if ((err as { code?: number })?.code === 4001) {
+      const code = (err as { code?: number })?.code
+      if (code === 4001) {
         throw new Error('You rejected the 0G network request in your wallet.')
+      }
+      // -32602: the wallet already has 0G added with a different symbol/params. That's
+      // fine — the network works; we just can't re-register it. Mark done, don't retry.
+      if (code === -32602) {
+        try {
+          localStorage.setItem(RPC_REGISTERED_KEY, '1')
+        } catch {
+          /* ignore */
+        }
+        return
       }
       // Some wallets won't re-add an existing chain — fall back to a plain switch.
       if (!onChain) {
