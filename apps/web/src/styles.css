@@ -86,6 +86,38 @@ body {
   flex-direction: column;
   gap: 18px;
 }
+/* Mobile: header stacks above content (unchanged feel). Desktop turns .hd into a sidebar. */
+.shell { display: flex; flex-direction: column; gap: 18px; }
+.content { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+
+/* ── Copy button ────────────────────────────────────────────────────────── */
+.copy-btn {
+  width: auto; background: none; box-shadow: none; border: none; padding: 2px 4px; margin: 0 1px;
+  display: inline-flex; align-items: center; justify-content: center; color: var(--faint);
+  border-radius: 6px; vertical-align: middle;
+}
+.copy-btn:hover:not(:disabled) { color: var(--cyan); background: rgba(255, 255, 255, 0.08); transform: none; box-shadow: none; }
+.copy-btn:active:not(:disabled) { transform: none; box-shadow: none; }
+.chip-dim { color: var(--faint); }
+
+/* ── Desktop: sidebar layout ────────────────────────────────────────────── */
+@media (min-width: 900px) {
+  .wrap { max-width: 1180px; padding: 32px 32px calc(40px + env(safe-area-inset-bottom)); }
+  .shell { display: grid; grid-template-columns: 256px minmax(0, 1fr); gap: 34px; align-items: start; }
+  .hd {
+    position: sticky; top: 28px; margin-bottom: 0; padding: 18px;
+    border-radius: 22px; border: 1px solid var(--line); background: var(--glass); backdrop-filter: blur(14px);
+  }
+  .hd-row { flex-direction: column; align-items: stretch; gap: 16px; }
+  .chip, .chip-btn { width: 100%; justify-content: center; }
+  .tabs {
+    flex-direction: column; gap: 6px; margin-top: 18px; padding: 0;
+    overflow: visible; background: transparent; border: none; backdrop-filter: none;
+  }
+  .tab { width: 100%; flex: 0 0 auto; text-align: left; padding: 12px 16px; font-size: 14.5px; }
+  /* Lists breathe across two columns on wide screens. */
+  .listings, .feed { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-content: start; }
+}
 
 .hd { margin-bottom: 2px; }
 .hd-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }

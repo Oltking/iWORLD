@@ -19,6 +19,7 @@ import { uploadBytes } from '../lib/storage'
 import { arenaLogConfigured, anchorMatch, getRecord, fetchLeaderboard, type RankRow, type MatchResult as ChainResult } from '../lib/arena-log'
 import { toast, humanizeError } from '../lib/toast'
 import { CompanionOrb } from '../components/CompanionOrb'
+import { CopyButton } from '../components/CopyButton'
 import { OG_TESTNET } from '../lib/og'
 import type { Status } from '../components/Dot'
 
@@ -297,7 +298,7 @@ export function Arena({
               return (
                 <li key={r.addr} className={`lrow ${me ? 'you' : ''}`}>
                   <span className="lrank">{i === 0 ? '👑' : `#${i + 1}`}</span>
-                  <span className="lname mono">{r.addr.slice(0, 6)}…{r.addr.slice(-4)}{me && <span className="lyou"> · you</span>}</span>
+                  <span className="lname mono">{r.addr.slice(0, 6)}…{r.addr.slice(-4)}<CopyButton text={r.addr} label="Copy address" />{me && <span className="lyou"> · you</span>}</span>
                   <span className="llvl">{r.wins}W / {r.matches}</span>
                   <span className="lduel-spacer" />
                 </li>

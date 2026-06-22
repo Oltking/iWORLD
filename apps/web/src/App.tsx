@@ -6,7 +6,7 @@
  */
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import { connectWallet, hasInjectedWallet, type Connection } from './lib/wallet'
-import { deriveOwnerKey, keyCheckValue } from './lib/crypto'
+import { deriveOwnerKey } from './lib/crypto'
 import { OG_TESTNET } from './lib/og'
 import { CompanionCreator } from './screens/CompanionCreator'
 import {
@@ -22,6 +22,7 @@ import { CompanionOrb } from './components/CompanionOrb'
 import { EmbeddedAuth } from './components/EmbeddedAuth'
 import { FundingButton } from './components/FundingButton'
 import { Toaster } from './components/Toaster'
+import { CopyButton } from './components/CopyButton'
 import { Welcome } from './screens/Welcome'
 import { toast, humanizeError } from './lib/toast'
 import { diagnoseConnection, fixNetwork, type Health } from './lib/health'
@@ -51,7 +52,6 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
   const [walletStatus, setWalletStatus] = useState<Status>('idle')
   const [walletErr, setWalletErr] = useState('')
   const [ownerKey, setOwnerKey] = useState<CryptoKey | null>(null)
-  const [kcv, setKcv] = useState('')
   const [unlockStatus, setUnlockStatus] = useState<Status>('idle')
   const [unlockErr, setUnlockErr] = useState('')
   const [showDev, setShowDev] = useState(false)
@@ -201,7 +201,6 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
     try {
       const key = await deriveOwnerKey(conn.signer, conn.address)
       setOwnerKey(key)
-      setKcv(await keyCheckValue(key))
       setUnlockStatus('ok')
       void refreshBalance(conn)
     } catch (e) {
@@ -294,7 +293,8 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
           </section>
         ) : (
           <>
-            {/* ── HEADER (connected) ─────────────────────────────────────────── */}
+            <div className="shell">
+            {/* ── HEADER (connected) → sidebar on desktop ─────────────────────── */}
             <header className="hd">
               <div className="hd-row">
                 <div className="hd-brand">
@@ -309,8 +309,10 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                     {walletStatus === 'busy' ? 'Connecting…' : 'Connect'}
                   </button>
                 ) : ownerKey ? (
-                  <span className="chip" title={`${conn.address}\n${balance ?? '?'} 0G\nkey ${kcv}`}>
-                    <span className="statusdot ok" /> {short} · {balance ?? '…'} 0G · 🔓
+                  <span className="chip" title={`${conn.address}\n${balance ?? '?'} 0G`}>
+                    <span className="statusdot ok" /> {short}
+                    <CopyButton text={conn.address} label="Copy address" />
+                    <span className="chip-dim">· {balance ?? '…'} 0G · 🔓</span>
                   </span>
                 ) : (
                   <button className="chip-btn" onClick={onUnlock} disabled={unlockStatus === 'busy'} title="Sign once to derive your encryption key">
@@ -318,6 +320,28 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                   </button>
                 )}
               </div>
+              {!showDev && (
+                <nav className="tabs">
+                  {companion ? (
+                    <>
+                      <button className={['world', 'breed', 'debate', 'square'].includes(view) ? 'tab on' : 'tab'} onClick={() => setView('world')}>World</button>
+                      <button className={view === 'chat' ? 'tab on' : 'tab'} onClick={() => setView('chat')}>Chat</button>
+                      <button className={view === 'train' ? 'tab on' : 'tab'} onClick={() => setView('train')}>Train</button>
+                      <button className={view === 'arena' ? 'tab on' : 'tab'} onClick={() => setView('arena')}>Arena</button>
+                      <button className={view === 'market' ? 'tab on' : 'tab'} onClick={() => setView('market')}>Market</button>
+                      <button className={view === 'vault' ? 'tab on' : 'tab'} onClick={() => setView('vault')}>Yours</button>
+                    </>
+                  ) : (
+                    <>
+                      <button className={view === 'create' ? 'tab on' : 'tab'} onClick={() => setView('create')}>Create</button>
+                      <button className={view === 'vault' ? 'tab on' : 'tab'} onClick={() => setView('vault')}>Yours</button>
+                    </>
+                  )}
+                </nav>
+              )}
+            </header>
+
+            <div className="content">
               {unlockErr && <p className="err">{unlockErr}</p>}
               {conn && health && !health.ok && (
                 <div className="lowfunds health">
@@ -339,26 +363,6 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                   )}
                 </div>
               )}
-              {!showDev && (
-                <nav className="tabs">
-                  {companion ? (
-                    <>
-                      <button className={['world', 'breed', 'debate', 'square'].includes(view) ? 'tab on' : 'tab'} onClick={() => setView('world')}>World</button>
-                      <button className={view === 'chat' ? 'tab on' : 'tab'} onClick={() => setView('chat')}>Chat</button>
-                      <button className={view === 'train' ? 'tab on' : 'tab'} onClick={() => setView('train')}>Train</button>
-                      <button className={view === 'arena' ? 'tab on' : 'tab'} onClick={() => setView('arena')}>Arena</button>
-                      <button className={view === 'market' ? 'tab on' : 'tab'} onClick={() => setView('market')}>Market</button>
-                      <button className={view === 'vault' ? 'tab on' : 'tab'} onClick={() => setView('vault')}>Yours</button>
-                    </>
-                  ) : (
-                    <>
-                      <button className={view === 'create' ? 'tab on' : 'tab'} onClick={() => setView('create')}>Create</button>
-                      <button className={view === 'vault' ? 'tab on' : 'tab'} onClick={() => setView('vault')}>Yours</button>
-                    </>
-                  )}
-                </nav>
-              )}
-            </header>
 
             <Suspense fallback={<ScreenLoading />}>
               {showDev ? (
@@ -441,6 +445,8 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                 />
               )}
             </Suspense>
+            </div>
+            </div>
           </>
         )}
 

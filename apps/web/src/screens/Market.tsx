@@ -15,6 +15,7 @@ import { celebrate } from '../lib/celebrate'
 import { SkeletonList } from '../components/Skeleton'
 import { OG_TESTNET } from '../lib/og'
 import { CompanionOrb } from '../components/CompanionOrb'
+import { CopyButton } from '../components/CopyButton'
 import type { Status } from '../components/Dot'
 
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`
@@ -172,6 +173,7 @@ export function Market({ conn, companion }: { conn: Connection; companion: Activ
                     )}
                     <span className="muted small">
                       {card?.level ? `⭐ Lv ${card.level} · ` : ''}by {mine ? 'you' : short(l.seller)}
+                      {!mine && <CopyButton text={l.seller} label="Copy seller address" />}
                     </span>
                   </div>
                   <div className="l-buy">
