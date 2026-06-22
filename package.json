@@ -10,6 +10,7 @@
   },
   "packageManager": "pnpm@9.15.9",
   "dependencies": {
+    "@0gfoundation/0g-compute-ts-sdk": "0.9.0-beta.0",
     "@0gfoundation/0g-storage-ts-sdk": "^1.2.10",
     "ethers": "6.13.1"
   },
