@@ -128,6 +128,21 @@ export function World({
         </div>
       </section>
 
+      {/* Make it truly yours — mint nudge (only until minted) */}
+      {!companion.tokenId && (
+        <section className="card mint-nudge">
+          <div className="card-h">
+            <span className="step">🪙</span>
+            <h2>Make it truly yours</h2>
+          </div>
+          <p className="muted small">
+            Mint <strong>{companion.name}</strong> as an iNFT — a token only you hold. It proves ownership
+            forever and unlocks the Marketplace and gifting. Costs about 0.001 0G.
+          </p>
+          <button onClick={onShape}>Mint in the Studio →</button>
+        </section>
+      )}
+
       {/* Gear — loot earned in the Arena */}
       {gear.length > 0 && (
         <section className="card">

@@ -19,6 +19,9 @@ import {
 import { CompanionOrb } from './components/CompanionOrb'
 import { EmbeddedAuth } from './components/EmbeddedAuth'
 import { FundingButton } from './components/FundingButton'
+import { Toaster } from './components/Toaster'
+import { Welcome } from './screens/Welcome'
+import { toast, humanizeError } from './lib/toast'
 import type { MemoryMessage } from './lib/conversation-store'
 import type { KiprExport } from './lib/export'
 import type { Status } from './components/Dot'
@@ -127,6 +130,7 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
     } catch (e) {
       setWalletErr((e as Error).message)
       setWalletStatus('error')
+      toast.error(humanizeError(e))
     }
   }, [applyConnection])
 
@@ -143,8 +147,14 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
     } catch (e) {
       setUnlockErr((e as Error).message)
       setUnlockStatus('error')
+      toast.error(humanizeError(e))
     }
   }, [conn, refreshBalance])
+
+  // Keep the balance honest — re-check whenever the user moves between screens.
+  useEffect(() => {
+    if (conn) void refreshBalance(conn)
+  }, [view, conn, refreshBalance])
 
   const short = conn ? `${conn.address.slice(0, 6)}…${conn.address.slice(-4)}` : null
 
@@ -291,6 +301,8 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                   companion={companion}
                   initial={restoredInitial ?? undefined}
                 />
+              ) : conn && !ownerKey && !companion ? (
+                <Welcome onUnlock={onUnlock} unlockStatus={unlockStatus} address={conn.address} />
               ) : (
                 <CompanionCreator
                   conn={conn}
@@ -315,11 +327,14 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
 
         <footer className="ft">
           <span className="ftdot" /> 0G Galileo testnet · chainId {OG_TESTNET.chainId}
-          <button className="devlink" onClick={() => setShowDev((v) => !v)}>
-            {showDev ? '← back to iWORLD' : 'developer tools'}
-          </button>
+          {(import.meta.env.DEV || showDev) && (
+            <button className="devlink" onClick={() => setShowDev((v) => !v)}>
+              {showDev ? '← back to iWORLD' : 'developer tools'}
+            </button>
+          )}
         </footer>
       </main>
+      <Toaster />
     </>
   )
 }
