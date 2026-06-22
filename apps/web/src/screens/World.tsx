@@ -39,6 +39,7 @@ export function World({
   onTalk,
   onTrain,
   onArena,
+  onDebate,
   onMarket,
   onBreed,
   onShape,
@@ -52,6 +53,7 @@ export function World({
   onTalk: () => void
   onTrain: () => void
   onArena: () => void
+  onDebate: () => void
   onMarket: () => void
   onBreed: () => void
   onShape: () => void
@@ -165,6 +167,7 @@ export function World({
           <button onClick={onTalk}>Talk</button>
           <button className="ghost" onClick={onTrain}>Train</button>
           <button className="ghost" onClick={onArena}>Arena</button>
+          <button className="ghost" onClick={onDebate}>🎤 Debate</button>
           <button className="ghost" onClick={onMarket}>Market</button>
           {roster.length >= 2 && <button className="ghost" onClick={onBreed}>🧬 Breed</button>}
           <button className="ghost" onClick={onShape}>Shape</button>

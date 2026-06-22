@@ -35,10 +35,11 @@ const Train = lazy(() => import('./screens/Train').then((m) => ({ default: m.Tra
 const Arena = lazy(() => import('./screens/Arena').then((m) => ({ default: m.Arena })))
 const Market = lazy(() => import('./screens/Market').then((m) => ({ default: m.Market })))
 const Breed = lazy(() => import('./screens/Breed').then((m) => ({ default: m.Breed })))
+const Debate = lazy(() => import('./screens/Debate').then((m) => ({ default: m.Debate })))
 const Vault = lazy(() => import('./screens/Vault').then((m) => ({ default: m.Vault })))
 const Harness = lazy(() => import('./screens/Harness').then((m) => ({ default: m.Harness })))
 
-type View = 'world' | 'create' | 'chat' | 'train' | 'arena' | 'market' | 'breed' | 'vault'
+type View = 'world' | 'create' | 'chat' | 'train' | 'arena' | 'market' | 'breed' | 'debate' | 'vault'
 
 // Sponsored funding is optional — only offered when a funder service is configured.
 const funderConfigured = !!(import.meta.env.VITE_FUNDER_URL as string | undefined)
@@ -330,6 +331,7 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                   onTalk={() => setView('chat')}
                   onTrain={() => setView('train')}
                   onArena={() => setView('arena')}
+                  onDebate={() => setView('debate')}
                   onMarket={() => setView('market')}
                   onBreed={() => setView('breed')}
                   onShape={() => setView('create')}
@@ -343,6 +345,8 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                 <Market conn={conn} companion={companion} />
               ) : companion && view === 'breed' && conn ? (
                 <Breed conn={conn} ownerKey={ownerKey} companion={companion} roster={roster} onBorn={(c) => adoptAgent(c)} />
+              ) : companion && view === 'debate' && conn ? (
+                <Debate conn={conn} ownerKey={ownerKey} companion={companion} />
               ) : view === 'vault' && conn ? (
                 <Vault
                   conn={conn}
