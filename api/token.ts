@@ -7,9 +7,13 @@
  * Set on Vercel: ZG_PRIVATE_KEY (the funded house wallet) + VITE_COMPUTE_RELAY_URL=/api
  * Optional: ZG_COMPUTE_PROVIDER_ADDR to pin a provider.
  */
+import { createRequire } from 'node:module'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { Wallet, JsonRpcProvider, verifyMessage } from 'ethers'
-import { createZGComputeNetworkBroker } from '@0gfoundation/0g-compute-ts-sdk'
+// SDK's ESM build is broken on Node 22; load the working CommonJS build via require().
+const { createZGComputeNetworkBroker } = createRequire(import.meta.url)(
+  '@0gfoundation/0g-compute-ts-sdk',
+) as typeof import('@0gfoundation/0g-compute-ts-sdk')
 
 const RPC = process.env.ZG_EVM_RPC || 'https://evmrpc-testnet.0g.ai'
 const CHAIN = Number(process.env.ZG_CHAIN_ID || '16602')

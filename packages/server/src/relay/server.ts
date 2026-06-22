@@ -12,10 +12,14 @@
  * Run: pnpm --filter @kipr/server relay   (needs HOUSE_PRIVATE_KEY in .env + a funded
  * house wallet; ~4 0G opens the shared ledger).
  */
+import { createRequire } from 'node:module'
 import express from 'express'
 import cors from 'cors'
 import { ethers } from 'ethers'
-import { createZGComputeNetworkBroker } from '@0gfoundation/0g-compute-ts-sdk'
+// SDK's ESM build is broken on Node 22; load the working CommonJS build via require().
+const { createZGComputeNetworkBroker } = createRequire(import.meta.url)(
+  '@0gfoundation/0g-compute-ts-sdk',
+) as typeof import('@0gfoundation/0g-compute-ts-sdk')
 import {
   pickTeeMLProvider,
   ensureInferenceFunding,

@@ -16,9 +16,15 @@
  * produced it ("no silent swap", non-negotiable #4). 'TeeTLS' (TEE-proxied centralized
  * LLM) and the Router are NOT the verified path.
  */
-import { createZGComputeNetworkBroker } from '@0gfoundation/0g-compute-ts-sdk'
+import { createRequire } from 'node:module'
 import type { ChainContext } from './chain.js'
 import { ONE_0G } from './chain.js'
+
+// The SDK's ESM build has a broken re-export that Node 22 rejects (Render); its CommonJS
+// build is fine. Load it via require() so it works across Node versions.
+const { createZGComputeNetworkBroker } = createRequire(import.meta.url)(
+  '@0gfoundation/0g-compute-ts-sdk',
+) as typeof import('@0gfoundation/0g-compute-ts-sdk')
 
 export type Broker = Awaited<ReturnType<typeof createZGComputeNetworkBroker>>
 
