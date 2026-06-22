@@ -90,6 +90,16 @@ export async function uploadBytes(signer: JsonRpcSigner, data: Uint8Array): Prom
   // Relay path: the house pays + uploads, so the user needs no 0G and no HTTP node access.
   if (storageRelayConfigured()) return relayUpload(signer, data)
 
+  // Direct uploads hit 0G's HTTP storage nodes — the browser BLOCKS that on an HTTPS
+  // page (mixed content). Fail with a clear reason instead of a mystery "network error".
+  if (typeof location !== 'undefined' && location.protocol === 'https:') {
+    throw new Error(
+      `Saving to 0G needs the storage relay on a secure (HTTPS) site, because 0G’s storage ` +
+        `nodes use plain HTTP that browsers block. Set VITE_STORAGE_RELAY_URL=/api on the deploy ` +
+        `(with ZG_PRIVATE_KEY) and redeploy. (Over http://localhost it works without one.)`,
+    )
+  }
+
   // Pre-flight: an empty wallet stalls silently at tx submission — fail clearly instead.
   const addr = await signer.getAddress()
   let balance: bigint

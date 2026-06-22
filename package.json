@@ -9,6 +9,13 @@
     "node": ">=22"
   },
   "packageManager": "pnpm@9.15.9",
+  "dependencies": {
+    "@0gfoundation/0g-storage-ts-sdk": "^1.2.10",
+    "ethers": "6.13.1"
+  },
+  "devDependencies": {
+    "@vercel/node": "^3.2.0"
+  },
   "scripts": {
     "smoke:storage": "pnpm --filter @kipr/og smoke:storage",
     "smoke:compute": "pnpm --filter @kipr/og smoke:compute",
