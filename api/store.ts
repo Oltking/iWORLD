@@ -39,7 +39,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // finalityRequired:false → return as soon as it's submitted (fast, fits the function
     // timeout); the data finalizes in the background before the user reads it back.
-    const [up, upErr] = await indexer.upload(mem, RPC, wallet, { finalityRequired: false } as never)
+    // `wallet as never`: ethers' ESM Wallet vs the SDK's bundled (CommonJS) Signer have an
+    // incompatible #private brand — same runtime type, nominally-different TS types.
+    const [up, upErr] = await indexer.upload(mem, RPC, wallet as never, { finalityRequired: false } as never)
     if (upErr) return res.status(500).json({ error: String((upErr as { message?: string })?.message ?? upErr) })
     const rootHash = 'rootHashes' in up ? up.rootHashes[0] : up.rootHash
     const txHash = 'rootHashes' in up ? up.txHashes[0] : up.txHash

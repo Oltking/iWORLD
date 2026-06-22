@@ -28,7 +28,9 @@ let cached: { broker: Broker; endpoint: string; model: string } | null = null
 async function ready(): Promise<{ broker: Broker; endpoint: string; model: string }> {
   if (cached) return cached
   const wallet = new Wallet(process.env.ZG_PRIVATE_KEY as string, new JsonRpcProvider(RPC, CHAIN))
-  const broker = await createZGComputeNetworkBroker(wallet)
+  // `wallet as never`: ethers' ESM Wallet vs the SDK's bundled (CommonJS) Wallet have an
+  // incompatible #private brand — same runtime type, nominally-different TS types.
+  const broker = await createZGComputeNetworkBroker(wallet as never)
   try {
     await broker.inference.acknowledgeProviderSigner(PROVIDER)
   } catch {
