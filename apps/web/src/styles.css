@@ -805,9 +805,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   /* Chat becomes a self-contained panel: thread scrolls, composer pinned. */
   .chat { height: calc(100vh - 96px); display: flex; flex-direction: column; }
   .chat .thread { flex: 1 1 auto; overflow-y: auto; min-height: 0; }
+  /* Anchor a short conversation to the bottom (near the composer); collapses when it fills. */
+  .chat .thread::before { content: ''; margin-top: auto; }
 }
 @media (min-width: 1000px) {
-  /* World hub → 2-column dashboard; the agent + roster span the full width. */
+  /* World hub → 2-column dashboard; the agent + roster + roadmap span the full width. */
   .world { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
-  .world > .world-hero, .world > .roster, .world > .agent-card { grid-column: 1 / -1; }
+  .world > .world-hero, .world > .roster, .world > .agent-card, .world > .world-ahead { grid-column: 1 / -1; }
+  .world > .world-ahead .phase-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 }

@@ -262,8 +262,8 @@ export function World({
         </p>
       </section>
 
-      {/* The world ahead — vision, honestly locked */}
-      <section className="card">
+      {/* The world ahead — vision, honestly locked (spans the dashboard's full width) */}
+      <section className="card world-ahead">
         <div className="card-h">
           <span className="step">🗺️</span>
           <h2>The world ahead</h2>

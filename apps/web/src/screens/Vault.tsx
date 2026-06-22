@@ -186,7 +186,7 @@ export function Vault({
           Bring an agent back from an export file — on a new device or wallet. We verify its integrity
           before trusting it.
         </p>
-        <button onClick={() => fileRef.current?.click()}>Choose export file…</button>
+        <button className="ghost" onClick={() => fileRef.current?.click()}>Choose export file…</button>
         <input ref={fileRef} type="file" accept="application/json,.json" onChange={onPickFile} style={{ display: 'none' }} />
         {importOk && <div className="okbox"><p>✓ {importOk}</p></div>}
         {importErr && <p className="err">{importErr}</p>}
