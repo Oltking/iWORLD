@@ -168,16 +168,16 @@ export function World({
           </ul>
         ) : null}
 
-        <div className="agent-actions">
-          <button onClick={onTalk}>Talk</button>
-          <button className="ghost" onClick={onTrain}>Train</button>
-          <button className="ghost" onClick={onArena}>Arena</button>
-          <button className="ghost" onClick={onDebate}>🎤 Debate</button>
-          <button className="ghost" onClick={onMarket}>Market</button>
-          {roster.length >= 2 && <button className="ghost" onClick={onBreed}>🧬 Breed</button>}
-          <button className="ghost" onClick={onSquare}>📰 Square</button>
-          <button className="ghost" onClick={onShape}>Shape</button>
-          <button className="ghost" onClick={onVault}>Yours</button>
+        <button className="talk-cta" onClick={onTalk}>💬 Talk with {companion.name}</button>
+        <div className="action-grid">
+          <button className="action" onClick={onTrain}><span className="action-ic">🎓</span>Train</button>
+          <button className="action" onClick={onArena}><span className="action-ic">⚔️</span>Arena</button>
+          <button className="action" onClick={onDebate}><span className="action-ic">🎤</span>Debate</button>
+          <button className="action" onClick={onMarket}><span className="action-ic">🪙</span>Market</button>
+          <button className="action" onClick={onBreed} disabled={roster.length < 2} title={roster.length < 2 ? 'Own two agents to breed' : 'Breed'}><span className="action-ic">🧬</span>Breed</button>
+          <button className="action" onClick={onSquare}><span className="action-ic">📰</span>Square</button>
+          <button className="action" onClick={onShape}><span className="action-ic">✨</span>Shape</button>
+          <button className="action" onClick={onVault}><span className="action-ic">🔐</span>Yours</button>
         </div>
       </section>
 

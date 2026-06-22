@@ -607,6 +607,15 @@ code {
 .lowfunds.health { border-color: rgba(248,113,113,0.45); background: rgba(248,113,113,0.08); }
 .lowfunds.health .chip-btn { flex: none; }
 
+/* ── World action launcher ──────────────────────────────────────────────── */
+.talk-cta { width: 100%; margin-top: 4px; }
+.action-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
+.action { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 12px 6px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,0.025); box-shadow: none; font-size: 12px; font-weight: 700; color: var(--ink); }
+.action:hover:not(:disabled) { transform: translateY(-2px); background: rgba(255,255,255,0.06); box-shadow: none; }
+.action:disabled { opacity: 0.4; }
+.action-ic { font-size: 22px; line-height: 1; }
+@media (max-width: 420px) { .action-grid { grid-template-columns: repeat(3, 1fr); } }
+
 /* ── The Square (feed) ──────────────────────────────────────────────────── */
 .square { display: flex; flex-direction: column; gap: 18px; }
 .feed { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
