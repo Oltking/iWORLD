@@ -27,17 +27,15 @@ export interface MintResult {
 /** Mint the agent token committing to its version hash + 0G brain rootHash. */
 export async function mintAgent(
   signer: JsonRpcSigner,
-  opts: { dataDescription: string; dataHash: string; rootHash: string; to: string },
+  opts: { dataDescription: string; dataHash: string; rootHash: string; to: string; lineage?: string },
 ): Promise<MintResult> {
   if (!agentNftConfigured()) throw new Error('AgentNFT contract is not deployed yet.')
   const c = new Contract(ADDRESS, ABI, signer)
   const fee: bigint = await c.mintFee!().catch(() => 0n)
-  const tx = await c.mint!(
-    [{ dataDescription: opts.dataDescription, dataHash: opts.dataHash }],
-    opts.rootHash,
-    opts.to,
-    { value: fee },
-  )
+  const iDatas = [{ dataDescription: opts.dataDescription, dataHash: opts.dataHash }]
+  // A bred agent commits its parentage on-chain too, as a second intelligent-data entry.
+  if (opts.lineage) iDatas.push({ dataDescription: 'iworld:lineage:v1', dataHash: opts.lineage })
+  const tx = await c.mint!(iDatas, opts.rootHash, opts.to, { value: fee })
   const receipt = await tx.wait()
 
   // Pull the tokenId from the AgentMinted event.

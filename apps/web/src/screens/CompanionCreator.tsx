@@ -26,6 +26,8 @@ import type { ActiveCompanion } from '../lib/session'
 import { persistPersonality, loadPersonality } from '../lib/companion-store'
 import { mintAgent, agentNftConfigured, type MintResult } from '../lib/mint'
 import { addVersion, getVersions } from '../lib/personality-history'
+import { keccak256, toUtf8Bytes } from 'ethers'
+import { getLineage } from '../lib/lineage'
 import { toast, humanizeError } from '../lib/toast'
 import { celebrate } from '../lib/celebrate'
 import { OG_TESTNET } from '../lib/og'
@@ -262,11 +264,13 @@ export function CompanionCreator({
     setMintStatus('busy')
     setMintErr('')
     try {
+      const ln = getLineage(agentId)
       const res = await mintAgent(conn.signer, {
         dataDescription: dataHash.dataDescription,
         dataHash: saved.version,
         rootHash: saved.rootHash,
         to: conn.address,
+        lineage: ln ? keccak256(toUtf8Bytes(`${ln.parentA}×${ln.parentB}`)) : undefined,
       })
       setMinted(res)
       setMintStatus('ok')
