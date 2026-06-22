@@ -4,7 +4,7 @@
  * fair, deterministic, auditable best-of-5 (see lib/arena); beat champions above you
  * and you rise past them on the leaderboard. Play-money XP only.
  */
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Connection } from '../lib/wallet'
 import type { ActiveCompanion } from '../lib/session'
 import { runDuel, styleFromText, TACTIC_ICON, type Fighter, type MatchResult } from '../lib/arena'
@@ -14,6 +14,8 @@ import { addXP, getXP, levelFromXP } from '../lib/progress'
 import { ownedStyleBoost, ownedXpBonus, rollDrop, addItem, type Item } from '../lib/items'
 import { encryptOwned } from '../lib/crypto'
 import { uploadBytes } from '../lib/storage'
+import { arenaLogConfigured, anchorMatch, getRecord, type MatchResult as ChainResult } from '../lib/arena-log'
+import { toast, humanizeError } from '../lib/toast'
 import { CompanionOrb } from '../components/CompanionOrb'
 import { OG_TESTNET } from '../lib/og'
 import type { Status } from '../components/Dot'
@@ -40,7 +42,16 @@ export function Arena({
   const [saveStatus, setSaveStatus] = useState<Status>('idle')
   const [savedRoot, setSavedRoot] = useState<string | null>(null)
   const [saveErr, setSaveErr] = useState('')
+  const [anchorStatus, setAnchorStatus] = useState<Status>('idle')
+  const [anchored, setAnchored] = useState(false)
+  const [record, setRecord] = useState<{ matches: number; wins: number } | null>(null)
   const timers = useRef<number[]>([])
+
+  const loadRecord = useCallback(() => {
+    if (!arenaLogConfigured()) return
+    getRecord(conn.provider, conn.address).then(setRecord).catch(() => {})
+  }, [conn])
+  useEffect(() => loadRecord(), [loadRecord])
 
   useEffect(() => {
     if (!ownerKey) return
@@ -74,6 +85,8 @@ export function Arena({
     setSavedRoot(null)
     setSaveErr('')
     setDrop(null)
+    setAnchored(false)
+    setAnchorStatus('idle')
 
     res.rounds.forEach((_, i) => {
       timers.current.push(window.setTimeout(() => setShown(i + 1), (i + 1) * 800))
@@ -121,6 +134,22 @@ export function Arena({
     }
   }
 
+  async function anchorOnChain() {
+    if (!result || !opponent) return
+    setAnchorStatus('busy')
+    try {
+      const r: ChainResult = result.winner === 'a' ? 1 : result.winner === 'draw' ? 2 : 0
+      await anchorMatch(conn.signer, `${opponent.name} ${opponent.title}`, result.transcriptHash, r)
+      setAnchored(true)
+      setAnchorStatus('ok')
+      toast.success('Match anchored on-chain ⛓️')
+      loadRecord()
+    } catch (e) {
+      setAnchorStatus('error')
+      toast.error(humanizeError(e))
+    }
+  }
+
   const done = result && !fighting
   const won = result?.winner === 'a'
   const draw = result?.winner === 'draw'
@@ -140,7 +169,13 @@ export function Arena({
           Challenge the champions — always here to test you. Best of five, hidden tactics, your agent’s
           character in the fight. Beat those above you and rise. Provably fair, play-money only.
         </p>
-        <div className="lvl"><span className="lvl-badge">⭐ Level {myLevel}</span><span className="muted small">{xp} XP</span></div>
+        <div className="lvl">
+          <span className="lvl-badge">⭐ Level {myLevel}</span>
+          <span className="muted small">{xp} XP</span>
+          {record && record.matches > 0 && (
+            <span className="lvl-badge" title="Your provable record, anchored on-chain">⛓️ {record.wins}W / {record.matches} on-chain</span>
+          )}
+        </div>
       </section>
 
       {/* active duel */}
@@ -188,13 +223,18 @@ export function Arena({
                     </div>
                   </div>
                 )}
-                {ownerKey && (
-                  <div className="memrow">
+                <div className="memrow">
+                  {ownerKey && (
                     <button className="ghost" onClick={saveMatch} disabled={saveStatus === 'busy' || !!savedRoot}>
                       {saveStatus === 'busy' ? 'Recording…' : savedRoot ? 'Recorded ✓' : 'Record on 0G'}
                     </button>
-                  </div>
-                )}
+                  )}
+                  {arenaLogConfigured() && (
+                    <button className="ghost" onClick={anchorOnChain} disabled={anchorStatus === 'busy' || anchored} title="Commit the result hash on-chain">
+                      {anchorStatus === 'busy' ? 'Anchoring…' : anchored ? 'Anchored ⛓️' : 'Anchor on-chain'}
+                    </button>
+                  )}
+                </div>
                 <p className="muted small center">
                   provably fair · <span className="mono hash">{result.transcriptHash.slice(0, 16)}…</span>
                   {savedRoot && <> · on 0G <a className="mono" href={OG_TESTNET.explorer} target="_blank" rel="noreferrer">{savedRoot.slice(0, 12)}…</a></>}

@@ -20,6 +20,7 @@ Compiles (Solc 0.8.24), **10/10 Foundry tests pass**, and both contracts are liv
 | **AgentMarket** (escrow, 2.5% fee) | `0x86e7746cBa2C71C832B9904935E56B7aA6b39975` |
 | **TransferRegistry** (re-key handoff) | `0xEBC2ac9286adc42560423703E48B4cE7af64799d` |
 | **AgentMeta** (public listing cards) | `0x98968768d18ff5367ac566a7e45e8D0Fc0ADd4ae` |
+| **ArenaLog** (on-chain match record) | `0x7A4df876D5b0aB5C71ccB6b1CdcC396294B625E3` |
 
 `AgentMarket.sol` = list / buy / cancel an agent on-chain (ownership transfers, seller
 paid minus fee). **TESTNET DEMO** of the economy — no real value, so the regulated
