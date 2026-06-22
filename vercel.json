@@ -3,8 +3,5 @@
   "buildCommand": "pnpm --filter @kipr/web build",
   "outputDirectory": "apps/web/dist",
   "framework": null,
-  "functions": {
-    "api/**/*.ts": { "maxDuration": 60 }
-  },
   "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }]
 }
