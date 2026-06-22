@@ -604,6 +604,15 @@ code {
 }
 .devlink:hover:not(:disabled) { transform: none; box-shadow: none; color: var(--muted); background: rgba(255,255,255,0.04); }
 
+/* ── Breeding ───────────────────────────────────────────────────────────── */
+.breed { display: flex; flex-direction: column; gap: 18px; }
+.breed-parents { display: flex; align-items: flex-end; gap: 12px; }
+.breed-pick { flex: 1; display: flex; flex-direction: column; }
+.breed-x { font-size: 22px; font-weight: 800; color: var(--muted); padding-bottom: 10px; }
+.breed-preview { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 16px; text-align: center; }
+.breed-preview .inp { text-align: center; }
+.breed-preview button { margin-top: 8px; }
+
 /* ── My Agents roster ───────────────────────────────────────────────────── */
 .roster { display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 8px; scrollbar-width: none; }
 .roster::-webkit-scrollbar { display: none; }

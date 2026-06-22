@@ -34,10 +34,11 @@ const Chat = lazy(() => import('./screens/Chat').then((m) => ({ default: m.Chat 
 const Train = lazy(() => import('./screens/Train').then((m) => ({ default: m.Train })))
 const Arena = lazy(() => import('./screens/Arena').then((m) => ({ default: m.Arena })))
 const Market = lazy(() => import('./screens/Market').then((m) => ({ default: m.Market })))
+const Breed = lazy(() => import('./screens/Breed').then((m) => ({ default: m.Breed })))
 const Vault = lazy(() => import('./screens/Vault').then((m) => ({ default: m.Vault })))
 const Harness = lazy(() => import('./screens/Harness').then((m) => ({ default: m.Harness })))
 
-type View = 'world' | 'create' | 'chat' | 'train' | 'arena' | 'market' | 'vault'
+type View = 'world' | 'create' | 'chat' | 'train' | 'arena' | 'market' | 'breed' | 'vault'
 
 // Sponsored funding is optional — only offered when a funder service is configured.
 const funderConfigured = !!(import.meta.env.VITE_FUNDER_URL as string | undefined)
@@ -330,6 +331,7 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                   onTrain={() => setView('train')}
                   onArena={() => setView('arena')}
                   onMarket={() => setView('market')}
+                  onBreed={() => setView('breed')}
                   onShape={() => setView('create')}
                   onVault={() => setView('vault')}
                 />
@@ -339,6 +341,8 @@ export function App({ privyEnabled }: { privyEnabled: boolean }) {
                 <Arena conn={conn} ownerKey={ownerKey} companion={companion} />
               ) : view === 'market' && conn ? (
                 <Market conn={conn} companion={companion} />
+              ) : companion && view === 'breed' && conn ? (
+                <Breed conn={conn} ownerKey={ownerKey} companion={companion} roster={roster} onBorn={(c) => adoptAgent(c)} />
               ) : view === 'vault' && conn ? (
                 <Vault
                   conn={conn}

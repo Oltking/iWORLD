@@ -14,6 +14,7 @@ import { getVersions } from '../lib/personality-history'
 import { getXP, levelFromXP } from '../lib/progress'
 import { ownedItems } from '../lib/items'
 import type { RosterAgent } from '../lib/roster'
+import { getLineage } from '../lib/lineage'
 import { CompanionOrb } from '../components/CompanionOrb'
 import type { PersonalityConfig } from '@kipr/core/personality'
 
@@ -39,6 +40,7 @@ export function World({
   onTrain,
   onArena,
   onMarket,
+  onBreed,
   onShape,
   onVault,
 }: {
@@ -51,10 +53,12 @@ export function World({
   onTrain: () => void
   onArena: () => void
   onMarket: () => void
+  onBreed: () => void
   onShape: () => void
   onVault: () => void
 }) {
   const activeId = agentIdOf(companion)
+  const lineage = getLineage(activeId)
   const level = levelFromXP(getXP(companion.ownerAddr))
   const gear = ownedItems(companion.ownerAddr)
   const [persona, setPersona] = useState<PersonalityConfig | null>(null)
@@ -146,6 +150,7 @@ export function World({
             <span className="abadge">🔑 Yours on 0G</span>
           )}
           <span className="abadge mono">{companion.version.slice(0, 10)}…</span>
+          {lineage && <span className="abadge">🧬 child of {lineage.parentA} × {lineage.parentB}</span>}
         </div>
 
         {persona?.values?.length ? (
@@ -161,6 +166,7 @@ export function World({
           <button className="ghost" onClick={onTrain}>Train</button>
           <button className="ghost" onClick={onArena}>Arena</button>
           <button className="ghost" onClick={onMarket}>Market</button>
+          {roster.length >= 2 && <button className="ghost" onClick={onBreed}>🧬 Breed</button>}
           <button className="ghost" onClick={onShape}>Shape</button>
           <button className="ghost" onClick={onVault}>Yours</button>
         </div>

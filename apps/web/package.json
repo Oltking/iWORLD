@@ -12,7 +12,8 @@
     "selftest:crypto": "tsx src/lib/crypto.selftest.mts",
     "selftest:export": "tsx src/lib/export.selftest.mts",
     "selftest:arena": "tsx src/lib/arena.selftest.mts",
-    "selftest:transfer": "tsx src/lib/transfer-crypto.selftest.mts"
+    "selftest:transfer": "tsx src/lib/transfer-crypto.selftest.mts",
+    "selftest:breed": "tsx src/lib/breed.selftest.mts"
   },
   "dependencies": {
     "@0gfoundation/0g-compute-ts-sdk": "0.9.0-beta.0",
