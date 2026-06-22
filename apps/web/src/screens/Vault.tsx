@@ -109,7 +109,7 @@ export function Vault({
         conversationHead: head,
       })
       const date = new Date().toISOString().slice(0, 10)
-      downloadJson(bundle, `kipr-${companion.name.toLowerCase()}-${date}.json`)
+      downloadJson(bundle, `iworld-${companion.name.toLowerCase()}-${date}.json`)
       setExportStatus('ok')
     } catch (e) {
       setExportErr((e as Error).message)
@@ -138,8 +138,7 @@ export function Vault({
       <section className="intro">
         <h2 className="intro-h">Yours to keep</h2>
         <p className="intro-p">
-          Take your companion with you, bring one back, or truly let go. No lock-in — this is the whole
-          point of KIPR.
+          Take your agent with you, bring one back, or truly let go. No lock-in —           point of iWORLD.
         </p>
       </section>
 
@@ -150,16 +149,16 @@ export function Vault({
           <h2>Export</h2>
         </div>
         <p className="muted small">
-          Download a decrypted, readable copy of {companion ? companion.name : 'your companion'} —
+          Download a decrypted, readable copy of {companion ? companion.name : 'your agent'} —
           personality + full conversation, pulled from 0G and unlocked with your key.
         </p>
         {!ownerKey ? (
           <p className="muted">Unlock to export.</p>
         ) : !companion ? (
-          <p className="muted">Create a companion first.</p>
+          <p className="muted">Create an agent first.</p>
         ) : (
           <button onClick={onExport} disabled={exportStatus === 'busy'}>
-            {exportStatus === 'busy' ? 'Gathering from 0G…' : 'Export my companion'}
+            {exportStatus === 'busy' ? 'Gathering from 0G…' : 'Export my agent'}
           </button>
         )}
         {exportStatus === 'ok' && <div className="okbox"><p>✓ Downloaded. That file is readable by you alone.</p></div>}
@@ -173,7 +172,7 @@ export function Vault({
           <h2>Restore</h2>
         </div>
         <p className="muted small">
-          Bring a companion back from an export file — on a new device or wallet. We verify its integrity
+          Bring an agent back from an export file — on a new device or wallet. We verify its integrity
           before trusting it.
         </p>
         <button onClick={() => fileRef.current?.click()}>Choose export file…</button>

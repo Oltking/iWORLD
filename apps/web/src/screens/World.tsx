@@ -90,7 +90,7 @@ export function World({
           <CompanionOrb size={128} state="idle" seed={companion.version} />
         </div>
         <h3 className="agent-name">{companion.name}</h3>
-        <p className="agent-vibe">{persona?.vibe ?? 'a companion that’s truly yours'}</p>
+        <p className="agent-vibe">{persona?.vibe ?? 'an agent that’s truly yours'}</p>
 
         <div className="agent-stats">
           <div className="stat"><span className="stat-n">{age}</span><span className="stat-l">day{age === 1 ? '' : 's'} alive</span></div>

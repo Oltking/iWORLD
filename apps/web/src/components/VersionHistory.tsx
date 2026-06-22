@@ -14,7 +14,7 @@ export function VersionHistory({ versions, current }: { versions: VersionEntry[]
         <span className="step">⌚</span>
         <h2>Version history</h2>
       </div>
-      <p className="muted small">Every version your companion has been — each one you chose, on the record.</p>
+      <p className="muted small">Every version your agent has been — each one you chose, on the record.</p>
       <ol className="timeline">
         {ordered.map((v, i) => (
           <li key={v.version} className={v.version === current ? 'tl on' : 'tl'}>

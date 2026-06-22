@@ -347,26 +347,29 @@ export function CompanionCreator({
         </details>
       </section>
 
-      {/* Live identity — the felt "no silent swap" */}
+      {/* Identity — plain language by default; the crypto proof tucked away */}
       <section className="card">
         <div className="card-h">
           <span className="step">2</span>
-          <h2>Identity (live)</h2>
+          <h2>Locked &amp; yours</h2>
         </div>
-        <dl className="kv">
-          <div>
-            <dt>personality version = ERC-7857 dataHash</dt>
-            <dd className="mono hash">{version}</dd>
-          </div>
-          <div><dt>descriptor</dt><dd className="mono">{dataHash.dataDescription}</dd></div>
-          <div><dt>owner</dt><dd className="mono">{conn ? conn.address : '— connect wallet —'}</dd></div>
-          <div><dt>encrypted blob size</dt><dd>{blobSize} bytes</dd></div>
-        </dl>
+        <p className="muted small">
+          Every detail is sealed under a version <strong>only you can change</strong> — no one can alter
+          your agent behind your back. Change anything above and it becomes a new version you opt into.
+        </p>
         <details className="reveal">
-          <summary>System prompt (pinned to this version)</summary>
+          <summary>What it’ll be like (preview)</summary>
           <pre className="pre">{config.systemPrompt}</pre>
         </details>
-        <p className="muted small">Edit any field above and this hash changes — that's the guarantee made visible.</p>
+        <details className="reveal">
+          <summary>Proof &amp; details</summary>
+          <dl className="kv">
+            <div><dt>version (the lock)</dt><dd className="mono hash">{version.slice(0, 22)}…</dd></div>
+            <div><dt>on-chain id (ERC-7857 dataHash)</dt><dd className="mono">{dataHash.dataDescription}</dd></div>
+            <div><dt>owner</dt><dd className="mono">{conn ? `${conn.address.slice(0, 10)}…` : '— connect wallet —'}</dd></div>
+            <div><dt>encrypted size</dt><dd>{blobSize} bytes</dd></div>
+          </dl>
+        </details>
       </section>
 
       {/* Commit — REAL: encrypt client-side + write to 0G. Editing requires opt-in. */}
@@ -389,7 +392,7 @@ export function CompanionCreator({
           </button>
         ) : !editing ? (
           <button onClick={persist} disabled={saveStatus === 'busy'}>
-            {saveStatus === 'busy' ? 'Encrypting → storing…' : 'Create companion'}
+            {saveStatus === 'busy' ? 'Encrypting → storing…' : 'Create agent'}
           </button>
         ) : !changed ? (
           <button disabled title="No changes to adopt">This is the current version ✓</button>
@@ -441,7 +444,7 @@ export function CompanionCreator({
             <Dot status={recoverStatus} />
           </div>
           <p className="muted small">
-            Rebuild the companion from 0G + your key alone (re-download, re-decrypt, re-hash). This is the
+            Rebuild the agent from 0G + your key alone (re-download, re-decrypt, re-hash). This is the
             "restore on a new device" guarantee — no server involved.
           </p>
           <button onClick={onRecover} disabled={recoverStatus === 'busy'}>
