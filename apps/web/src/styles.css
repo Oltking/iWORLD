@@ -240,7 +240,10 @@ body {
 }
 
 /* ── buttons ────────────────────────────────────────────────────────────── */
-button {
+/* Scoped to #root via :where() (0 added specificity) so these never leak into Privy's
+   modal, which portals to document.body OUTSIDE #root. The leak made its email field
+   misaligned/unclickable (our width:100% gradient buttons were distorting the modal). */
+:where(#root) button {
   appearance: none; border: none; cursor: pointer;
   font-family: inherit; font-weight: 700; font-size: 15px;
   color: #fff;
@@ -250,9 +253,9 @@ button {
   box-shadow: 0 10px 26px -10px rgba(124, 58, 237, 0.7);
   transition: transform 0.15s, box-shadow 0.2s, background-position 0.4s, filter 0.2s;
 }
-button:hover:not(:disabled) { transform: translateY(-2px); background-position: 100% 0; box-shadow: 0 16px 34px -10px rgba(219, 39, 119, 0.7); }
-button:active:not(:disabled) { transform: translateY(0); }
-button:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; filter: grayscale(0.3); }
+:where(#root) button:hover:not(:disabled) { transform: translateY(-2px); background-position: 100% 0; box-shadow: 0 16px 34px -10px rgba(219, 39, 119, 0.7); }
+:where(#root) button:active:not(:disabled) { transform: translateY(0); }
+:where(#root) button:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; filter: grayscale(0.3); }
 
 /* small pill buttons in the header */
 .chip-btn {
