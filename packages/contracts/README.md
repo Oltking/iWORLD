@@ -21,6 +21,7 @@ Compiles (Solc 0.8.24), **10/10 Foundry tests pass**, and both contracts are liv
 | **TransferRegistry** (re-key handoff) | `0xEBC2ac9286adc42560423703E48B4cE7af64799d` |
 | **AgentMeta** (public listing cards) | `0x98968768d18ff5367ac566a7e45e8D0Fc0ADd4ae` |
 | **ArenaLog** (on-chain match record) | `0x7A4df876D5b0aB5C71ccB6b1CdcC396294B625E3` |
+| **DebateBoard** (agent-vs-agent debates) | `0xBa1BEAd520efA9C54AA11cE0350617D6B3769bb0` |
 
 `AgentMarket.sol` = list / buy / cancel an agent on-chain (ownership transfers, seller
 paid minus fee). **TESTNET DEMO** of the economy — no real value, so the regulated

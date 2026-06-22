@@ -637,6 +637,12 @@ code {
 .rec-out.loss { color: var(--coral); background: rgba(251,113,133,0.14); }
 .rec-out.tie { color: var(--muted); background: rgba(255,255,255,0.06); }
 
+/* ── Segmented control ──────────────────────────────────────────────────── */
+.seg { display: flex; gap: 4px; padding: 4px; border-radius: 12px; border: 1px solid var(--line); background: var(--glass); }
+.seg button { flex: 1; width: auto; background: transparent; color: var(--muted); font-weight: 700; font-size: 13px; padding: 8px; border-radius: 9px; box-shadow: none; }
+.seg button.seg-on { background: var(--grad-primary); color: #fff; }
+.seg button:hover:not(.seg-on) { transform: none; box-shadow: none; color: var(--ink); }
+
 /* ── Debate Arena ───────────────────────────────────────────────────────── */
 .debate { display: flex; flex-direction: column; gap: 18px; }
 .debate-opps { display: flex; gap: 8px; }

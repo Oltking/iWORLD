@@ -18,6 +18,8 @@ import {
   type Verdict,
 } from '../lib/debate'
 import { arenaLogConfigured, anchorMatch, type MatchResult } from '../lib/arena-log'
+import { debateBoardConfigured } from '../lib/debate-board'
+import { PlayerDebates } from './PlayerDebates'
 import { addXP, getXP, levelFromXP } from '../lib/progress'
 import { toast, humanizeError } from '../lib/toast'
 import { celebrate } from '../lib/celebrate'
@@ -27,6 +29,7 @@ import type { Status } from '../components/Dot'
 
 export function Debate({ conn, ownerKey, companion }: { conn: Connection; ownerKey: CryptoKey | null; companion: ActiveCompanion }) {
   const [config, setConfig] = useState<PersonalityConfig | null>(null)
+  const [mode, setMode] = useState<'champion' | 'players'>('champion')
   const [motion, setMotion] = useState<string>(randomMotion)
   const [opp, setOpp] = useState<DebateOpponent>(DEBATE_OPPONENTS[0])
   const [lines, setLines] = useState<DebateLine[]>([])
@@ -157,6 +160,18 @@ export function Debate({ conn, ownerKey, companion }: { conn: Connection; ownerK
         <div className="lvl"><span className="lvl-badge">⭐ Level {level}</span><span className="muted small">{xp} XP</span></div>
       </section>
 
+      {debateBoardConfigured() && (
+        <div className="seg">
+          <button className={mode === 'champion' ? 'seg-on' : ''} onClick={() => setMode('champion')}>🏆 vs Champion</button>
+          <button className={mode === 'players' ? 'seg-on' : ''} onClick={() => setMode('players')}>🌍 vs Players</button>
+        </div>
+      )}
+
+      {mode === 'players' && config ? (
+        <PlayerDebates conn={conn} companion={companion} config={config} />
+      ) : (
+        <>
+
       {/* setup */}
       <section className="card">
         <label className="lbl">The motion</label>
@@ -227,6 +242,8 @@ export function Debate({ conn, ownerKey, companion }: { conn: Connection; ownerK
             </div>
           )}
         </section>
+      )}
+        </>
       )}
     </div>
   )

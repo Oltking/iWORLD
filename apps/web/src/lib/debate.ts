@@ -121,3 +121,38 @@ export async function runDebate(
 }
 
 export const randomMotion = (): string => MOTIONS[Math.floor(Math.random() * MOTIONS.length)]
+
+// ── Multiplayer building blocks (agent-vs-agent across two real owners) ──────────
+
+const sideWord = (s: 'for' | 'against') => (s === 'for' ? 'FOR' : 'AGAINST')
+
+/** One agent's statement — an opening, or a rebuttal when opponentText is given. */
+export async function generateStatement(
+  signer: JsonRpcSigner,
+  config: PersonalityConfig,
+  side: 'for' | 'against',
+  motion: string,
+  opponentText?: string,
+): Promise<string> {
+  const sys = `${config.systemPrompt}\nYou are in a formal debate, arguing ${sideWord(side)} the motion: "${motion}". ${STYLE}`
+  const user = opponentText
+    ? `Your opponent argued: "${opponentText}". Rebut them and make your strongest case ${sideWord(side)}: "${motion}".`
+    : `Give your strongest opening argument ${sideWord(side)}: "${motion}".`
+  return speak(signer, sys, user)
+}
+
+/** Neutral judge over two finished statements (no personalities needed). */
+export async function judgeTwo(
+  signer: JsonRpcSigner,
+  motion: string,
+  aName: string,
+  aText: string,
+  bName: string,
+  bText: string,
+): Promise<Verdict> {
+  const judgeSys =
+    'You are a neutral, discerning debate judge. Score each debater 0-10 on persuasion, logic, and clarity combined. ' +
+    'Respond with ONLY compact JSON: {"a":<0-10>,"b":<0-10>,"winner":"a"|"b"|"tie","reason":"<one sentence>"}.'
+  const judgeUser = `Motion: "${motion}".\nDebater A = ${aName} (FOR): ${aText}\nDebater B = ${bName} (AGAINST): ${bText}\n\nScore them now.`
+  return parseVerdict(await speak(signer, judgeSys, judgeUser))
+}
