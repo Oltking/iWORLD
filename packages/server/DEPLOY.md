@@ -17,7 +17,8 @@ user's own wallet.
 1. **render.com → New → Web Service** → connect `github.com/Oltking/iWORLD`.
 2. Settings:
    - **Runtime:** Node
-   - **Build Command:** `corepack enable && pnpm install`
+   - **Build Command:** `corepack enable && pnpm install --prod=false`
+     (`--prod=false` guarantees `tsx`, the relay's runner, is installed)
    - **Start Command:** `pnpm --filter @kipr/server relay`
    - **Health Check Path:** `/health`
 3. **Environment variables** (Settings → Environment):
