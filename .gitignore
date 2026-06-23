@@ -31,3 +31,6 @@ research/docs/llms-full.txt
 .DS_Store
 Thumbs.db
 screenshots for claude dont commit/
+
+# local source art (hosted copies live in apps/web/public)
+logo_cover/
